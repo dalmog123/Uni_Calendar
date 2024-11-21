@@ -1,12 +1,71 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd'
-import { ChevronDown, ChevronUp, Calendar, Book, Clock, User } from 'lucide-react'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Slider } from '@/components/ui/slider'
 import { Course, Year, syllabusData } from './data'
+
+const SyllabusSelector: React.FC<{ selectedPlan: string; onPlanChange: (value: string) => void }> = ({ selectedPlan, onPlanChange }) => {
+  return (
+    <Card className="mb-6">
+      <CardHeader>
+        <CardTitle>בחר/י מסלול לימודים</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+          <button
+            onClick={() => onPlanChange('3.5-first')}
+            className={`p-3 rounded-lg text-right transition-colors min-w-40 ${
+              selectedPlan === '3.5-first' 
+                ? 'bg-primary text-primary-foreground' 
+                : 'hover:bg-muted'
+            }`}
+          >
+            3.5 שנים - סמסטר א׳
+          </button>
+          <button
+            onClick={() => onPlanChange('3.5-second')}
+            className={`p-3 rounded-lg text-right transition-colors ${
+              selectedPlan === '3.5-second' 
+                ? 'bg-primary text-primary-foreground' 
+                : 'hover:bg-muted'
+            }`}
+          >
+            3.5 שנים - סמסטר ב׳
+          </button>
+          <button
+            onClick={() => onPlanChange('4.5-first')}
+            className={`p-3 rounded-lg text-right transition-colors ${
+              selectedPlan === '4.5-first' 
+                ? 'bg-primary text-primary-foreground' 
+                : 'hover:bg-muted'
+            }`}
+          >
+            4.5 שנים - סמסטר א׳
+          </button>
+          <button
+            onClick={() => onPlanChange('4.5-second')}
+            className={`p-3 rounded-lg text-right transition-colors ${
+              selectedPlan === '4.5-second' 
+                ? 'bg-primary text-primary-foreground' 
+                : 'hover:bg-muted'
+            }`}
+          >
+            4.5 שנים - סמסטר ב׳
+          </button>
+          <button
+            disabled
+            className="p-3 rounded-lg text-right opacity-50 cursor-not-allowed"
+          >
+            מותאם אישית (בקרוב)
+          </button>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
 
 const CourseCard: React.FC<{ course: Course; isDragging: boolean }> = ({ course, isDragging }) => {
   const [isExpanded, setIsExpanded] = useState(false)
@@ -30,7 +89,6 @@ const CourseCard: React.FC<{ course: Course; isDragging: boolean }> = ({ course,
           </div>
           <div className="flex justify-between items-center mt-2">
             <span>{course.semester}</span>
-            <User className="h-4 w-4" />
           </div>
         </CardContent>
       )}
@@ -93,62 +151,15 @@ const YearCard: React.FC<{ year: Year }> = ({ year }) => (
   </Card>
 )
 
-const Timeline: React.FC<{ 
-  years: number; 
-  setYears: (years: number) => void; 
-  totalCourses: number; 
-  totalCredits: number 
-}> = ({ years, setYears, totalCourses, totalCredits }) => (
-  <Card className="mb-6">
-    <CardHeader>
-      <CardTitle>משך הלימודים</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="flex items-center space-x-4">
-        <Slider
-          value={[years]}
-          onValueChange={(value) => setYears(value[0])}
-          min={3}
-          max={11}
-          step={0.5}
-          className="flex-grow"
-        />
-        <span className="text-2xl font-bold">{years} שנים</span>
-      </div>
-      <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
-        <div className="flex items-center gap-2">
-          <Book className="h-4 w-4" />
-          <span>{totalCourses} קורסים</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4" />
-          <span>{totalCredits} נ"ז</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Clock className="h-4 w-4" />
-          <span>{(totalCourses / (years * 2)).toFixed(1)} קורסים לסמסטר</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <User className="h-4 w-4" />
-          <span>{years <= 3.5 ? 'מואץ' : years <= 4 ? 'רגיל' : 'מוקטן'}</span>
-        </div>
-      </div>
-    </CardContent>
-  </Card>
-)
-
 export default function Syllabus() {
-  const [years, setYears] = useState(4)
+  const [selectedPlan, setSelectedPlan] = useState('3.5-first')
   const [syllabusState, setSyllabusState] = useState(syllabusData)
 
-  const totalCourses = syllabusState.reduce((total, year) => 
-    total + Object.values(year.semesters).reduce((yearTotal, semester) => 
-      yearTotal + semester.length, 0), 0)
-
-  const totalCredits = syllabusState.reduce((total, year) => 
-    total + Object.values(year.semesters).reduce((yearTotal, semester) => 
-      yearTotal + semester.reduce((semesterTotal, course) => 
-        semesterTotal + course.credits, 0), 0), 0)
+  const handlePlanChange = (value: string) => {
+    setSelectedPlan(value)
+    // Here you would load the appropriate syllabus data based on the selected plan
+    // For now, we'll keep using the same syllabusData
+  }
 
   const onDragEnd = (result: DropResult) => {
     if (!result.destination) return
@@ -172,12 +183,7 @@ export default function Syllabus() {
     <div className="container mx-auto p-4 py-8 max-w-6xl" dir="rtl">
       <h1 className="text-3xl font-bold mb-8 text-right">חשבונאות עם חטיבה מורחבת בכלכלה</h1>
       
-      <Timeline 
-        years={years} 
-        setYears={setYears} 
-        totalCourses={totalCourses} 
-        totalCredits={totalCredits} 
-      />
+      <SyllabusSelector selectedPlan={selectedPlan} onPlanChange={handlePlanChange} />
       
       <DragDropContext onDragEnd={onDragEnd}>
         {syllabusState.map((year) => (
