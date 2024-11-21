@@ -2,7 +2,7 @@
 
 import { Button } from "./button"
 import Link from "next/link"
-import { CalendarDays, BookOpen, Library, Calculator, Menu } from "lucide-react"
+import { CalendarDays, BookOpen, Library, Calculator, Menu, Home } from "lucide-react"
 import { useState } from "react"
 
 export function Header() {
@@ -18,17 +18,29 @@ export function Header() {
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
-          <button 
-            className="md:hidden"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            <Menu className="h-6 w-6" />
-          </button>
+          {/* Mobile Home Button + Menu Button */}
+          <div className="flex items-center gap-2 md:hidden">
+            <Link href="/">
+              <Button variant="ghost" size="icon">
+                <Home className="h-5 w-5" />
+              </Button>
+            </Link>
+            <button 
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              <Menu className="h-6 w-6" />
+            </button>
+          </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-4">
             <Link href="/">
+              <Button variant="ghost" className="flex items-center gap-2">
+                <Home className="h-4 w-4" />
+                דף הבית
+              </Button>
+            </Link>
+            <Link href="/calendar">
               <Button variant="ghost" className="flex items-center gap-2">
                 <CalendarDays className="h-4 w-4" />
                 לוח שנה
@@ -58,7 +70,7 @@ export function Header() {
         {/* Mobile Navigation */}
         {isMenuOpen && (
           <nav className="md:hidden py-4 space-y-2">
-            <Link href="/" className="block">
+            <Link href="/calendar" className="block">
               <Button variant="ghost" className="w-full justify-start gap-2">
                 <CalendarDays className="h-4 w-4" />
                 לוח שנה

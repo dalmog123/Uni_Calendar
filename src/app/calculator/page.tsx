@@ -158,19 +158,12 @@ export default function Calculator() {
                   <TableRow>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <span>קורס פטור בהנהלת חשבונות:</span>
-                        <Select
-                          value={includeAccounting ? "yes" : "no"}
-                          onValueChange={(value) => setIncludeAccounting(value === "yes")}
-                        >
-                          <SelectTrigger className="w-[100px]">
-                            <SelectValue placeholder="בחר" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="no">לא כולל</SelectItem>
-                            <SelectItem value="yes">כולל</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Checkbox
+                          id="accountingExemption"
+                          checked={includeAccounting}
+                          onCheckedChange={(checked) => setIncludeAccounting(checked as boolean)}
+                        />
+                        <label htmlFor="accountingExemption">קורס פטור בהנהלת חשבונות</label>
                       </div>
                     </TableCell>
                     <TableCell className="text-right">{(includeAccounting ? COSTS.accountingExemption : 0).toLocaleString()}</TableCell>
