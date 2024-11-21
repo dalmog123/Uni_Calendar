@@ -10,14 +10,14 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { syllabusData } from '../syllabus/data'
 
 const COSTS = {
-  coursePrice: 1773,
-  extraGuidance: 343,
-  summerSemester: 327,
+  coursePrice: 1792,
+  extraGuidance: 349,
+  summerSemester: 334,
   security: 52,
   additionalCoursesCount: 5,
-  englishCourse: 2000,
-  accountingExemption: 2000,
-  registration: 777,
+  englishCourse: 2422,
+  accountingExemption: 2422,
+  registration: 877,
   studentOrg: 10,
 }
 
@@ -113,6 +113,16 @@ export default function Calculator() {
                 <SummaryRow label="סה״כ עלות התואר" value={totalCost} isTotal />
               </TableBody>
             </Table>
+            <div className="text-xs text-muted-foreground mt-4 text-right">
+              <a 
+                href="https://www.openu.ac.il/registration/payments/tables/pages/default.aspx" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="hover:underline"
+              >
+                *זהו אומדן בלבד. לטבלת התשלומים המלאה באתר האוניברסיטה הפתוחה לחץ כאן
+              </a>
+            </div>
           </CardContent>
         </Card>
 
