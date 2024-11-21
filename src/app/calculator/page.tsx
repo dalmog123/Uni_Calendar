@@ -3,6 +3,10 @@
 import React, { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { syllabusData } from '../syllabus/data'
 
 const COSTS = {
@@ -24,10 +28,10 @@ interface SummaryRowProps {
 }
 
 const SummaryRow: React.FC<SummaryRowProps> = ({ label, value, isTotal }) => (
-  <div className={`grid grid-cols-2 ${isTotal ? 'font-bold border-t pt-2' : ''}`}>
-    <span>{label}</span>
-    <span className="text-left">{typeof value === 'number' ? value.toLocaleString() : value}</span>
-  </div>
+  <TableRow className={isTotal ? 'font-bold' : ''}>
+    <TableCell>{label}</TableCell>
+    <TableCell className="text-right">{typeof value === 'number' ? value.toLocaleString() : value}</TableCell>
+  </TableRow>
 )
 
 export default function Calculator() {
@@ -35,7 +39,6 @@ export default function Calculator() {
   const [englishCourses, setEnglishCourses] = useState(0)
   const [includeAccounting, setIncludeAccounting] = useState(false)
   
-  // Calculate total regular courses (excluding English courses and additional courses)
   const regularCourses = syllabusData.reduce((total, year) => {
     return total + Object.values(year.semesters).reduce((semTotal, courses) => {
       return semTotal + courses.filter(course => 
@@ -46,12 +49,10 @@ export default function Calculator() {
     }, 0)
   }, 0) - COSTS.additionalCoursesCount - 1;
 
-  // Count summer semesters
   const summerSemesters = syllabusData.reduce((total, year) => {
     return total + (year.semesters['סמסטר ג'] ? 1 : 0)
   }, 0)
 
-  // Calculate costs
   const baseCost = regularCourses * COSTS.coursePrice
   const securityCost = regularCourses * COSTS.security
   const summerCost = summerSemesters * COSTS.summerSemester
@@ -61,10 +62,8 @@ export default function Calculator() {
   const totalMainCost = baseCost + securityCost + summerCost + extraGuidanceCost
   const totalAdditionalCost = additionalGuidanceCost
 
-  // Add this calculation
   const studyYears = syllabusData.length;
 
-  // Add new function inside Calculator component
   const handleSelectAllCourses = (select: boolean) => {
     if (select) {
       const allCourseIds = syllabusData.flatMap(year => 
@@ -80,175 +79,194 @@ export default function Calculator() {
     }
   };
 
+  const totalCost = totalMainCost + 
+    totalAdditionalCost + 
+    (englishCourses * COSTS.englishCourse) + 
+    (includeAccounting ? COSTS.accountingExemption : 0) + 
+    COSTS.registration + 
+    (COSTS.studentOrg * studyYears);
+
   return (
     <div className="container mx-auto p-4 py-8 max-w-4xl" dir="rtl">
       <h1 className="text-3xl font-bold mb-8">חישוב עלות תואר</h1>
 
       <div className="grid gap-6">
-        {/* Main Costs Table */}
         <Card>
           <CardHeader>
-            <CardTitle>עלויות עיקריות</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <SummaryRow label={`קורסים: ${regularCourses}`} value={baseCost} />
-            <SummaryRow label={`דמי אבטחה לקורס: ${COSTS.security}`} value={securityCost} />
-            <SummaryRow label={`תוספת קיץ: ${COSTS.summerSemester}`} value={summerCost} />
-            <SummaryRow 
-              label={`הנחייה מוגברת (${selectedCourses.length} קורסים): ${COSTS.extraGuidance}`} 
-              value={extraGuidanceCost} 
-            />
-            <SummaryRow label="סה״כ" value={totalMainCost} isTotal />
-          </CardContent>
-        </Card>
-
-        {/* Additional Costs Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>עלויות נוספות</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <SummaryRow 
-              label={`קורסים נוספים: ${COSTS.additionalCoursesCount}`} 
-              value="0" 
-            />
-            <SummaryRow 
-              label={`הנחייה מוגברת: ${COSTS.extraGuidance}`} 
-              value={additionalGuidanceCost} 
-            />
-            <div className="grid grid-cols-2">
-              <div className="flex items-center gap-2">
-                <label>קורס פטור בהנהלת חשבונות:</label>
-                <select 
-                  value={includeAccounting ? "yes" : "no"} 
-                  onChange={(e) => setIncludeAccounting(e.target.value === "yes")}
-                  className="border rounded p-1"
-                >
-                  <option value="no">לא כולל</option>
-                  <option value="yes">כולל</option>
-                </select>
-              </div>
-              <span className="text-left">{(includeAccounting ? COSTS.accountingExemption : 0).toLocaleString()}</span>
-            </div>
-            <div className="grid grid-cols-2">
-              <div className="flex items-center gap-2">
-                <label>קורסי אנגלית:</label>
-                <select 
-                  value={englishCourses} 
-                  onChange={(e) => setEnglishCourses(Number(e.target.value))}
-                  className="border rounded p-1"
-                >
-                  {[0, 1, 2, 3, 4].map(num => (
-                    <option key={num} value={num}>{num}</option>
-                  ))}
-                </select>
-              </div>
-              <span className="text-left">{(englishCourses * COSTS.englishCourse).toLocaleString()}</span>
-            </div>
-            <SummaryRow 
-              label="הרשמה ללימודים" 
-              value={COSTS.registration} 
-            />
-            <SummaryRow 
-              label={`ארגון סטודנטים (${studyYears} שנים)`} 
-              value={COSTS.studentOrg * studyYears} 
-            />
-            <SummaryRow 
-              label="סה״כ" 
-              value={
-                totalAdditionalCost + 
-                (englishCourses * COSTS.englishCourse) + 
-                (includeAccounting ? COSTS.accountingExemption : 0) + 
-                COSTS.registration + 
-                (COSTS.studentOrg * studyYears)
-              } 
-              isTotal 
-            />
-          </CardContent>
-        </Card>
-
-        {/* Total Summary Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle>סה״כ עלות התואר</CardTitle>
+            <CardTitle>סיכום עלויות</CardTitle>
           </CardHeader>
           <CardContent>
-            <SummaryRow 
-              label="עלויות עיקריות" 
-              value={totalMainCost} 
-            />
-            <SummaryRow 
-              label="עלויות נוספות" 
-              value={
-                totalAdditionalCost + 
-                (englishCourses * COSTS.englishCourse) + 
-                (includeAccounting ? COSTS.accountingExemption : 0) + 
-                COSTS.registration + 
-                (COSTS.studentOrg * studyYears)
-              } 
-            />
-            <SummaryRow 
-              label="סה״כ עלות התואר" 
-              value={
-                totalMainCost + 
-                totalAdditionalCost + 
-                (englishCourses * COSTS.englishCourse) + 
-                (includeAccounting ? COSTS.accountingExemption : 0) + 
-                COSTS.registration + 
-                (COSTS.studentOrg * studyYears)
-              } 
-              isTotal 
-            />
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-right">פריט</TableHead>
+                  <TableHead className="text-right">עלות (₪)</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <SummaryRow label="עלויות עיקריות" value={totalMainCost} />
+                <SummaryRow label="עלויות נוספות" value={totalAdditionalCost + 
+                  (englishCourses * COSTS.englishCourse) + 
+                  (includeAccounting ? COSTS.accountingExemption : 0) + 
+                  COSTS.registration + 
+                  (COSTS.studentOrg * studyYears)} />
+                <SummaryRow label="סה״כ עלות התואר" value={totalCost} isTotal />
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
 
-        {/* Course Selection Grid */}
+        <div className="grid md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>עלויות עיקריות</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-right">פריט</TableHead>
+                    <TableHead className="text-right">עלות (₪)</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <SummaryRow label={`קורסים (${regularCourses})`} value={baseCost} />
+                  <SummaryRow label="דמי אבטחה לקורס" value={securityCost} />
+                  <SummaryRow label="תוספת קיץ" value={summerCost} />
+                  <SummaryRow label={`הנחייה מוגברת (${selectedCourses.length} קורסים)`} value={extraGuidanceCost} />
+                  <SummaryRow label="סה״כ" value={totalMainCost} isTotal />
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>עלויות נוספות</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-right">פריט</TableHead>
+                    <TableHead className="text-right">עלות (₪)</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <SummaryRow label={`קורסים נוספים (${COSTS.additionalCoursesCount})`} value="0" />
+                  <SummaryRow label="הנחייה מוגברת" value={additionalGuidanceCost} />
+                  <TableRow>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <span>קורס פטור בהנהלת חשבונות:</span>
+                        <Select
+                          value={includeAccounting ? "yes" : "no"}
+                          onValueChange={(value) => setIncludeAccounting(value === "yes")}
+                        >
+                          <SelectTrigger className="w-[100px]">
+                            <SelectValue placeholder="בחר" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="no">לא כולל</SelectItem>
+                            <SelectItem value="yes">כולל</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">{(includeAccounting ? COSTS.accountingExemption : 0).toLocaleString()}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <span>קורסי אנגלית:</span>
+                        <Select
+                          value={englishCourses.toString()}
+                          onValueChange={(value) => setEnglishCourses(Number(value))}
+                        >
+                          <SelectTrigger className="w-[100px]">
+                            <SelectValue placeholder="בחר" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {[0, 1, 2, 3, 4].map(num => (
+                              <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">{(englishCourses * COSTS.englishCourse).toLocaleString()}</TableCell>
+                  </TableRow>
+                  <SummaryRow label="הרשמה ללימודים" value={COSTS.registration} />
+                  <SummaryRow label={`ארגון סטודנטים (${studyYears} שנים)`} value={COSTS.studentOrg * studyYears} />
+                  <SummaryRow 
+                    label="סה״כ" 
+                    value={
+                      totalAdditionalCost + 
+                      (englishCourses * COSTS.englishCourse) + 
+                      (includeAccounting ? COSTS.accountingExemption : 0) + 
+                      COSTS.registration + 
+                      (COSTS.studentOrg * studyYears)
+                    } 
+                    isTotal 
+                  />
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </div>
+
         <Card>
           <CardHeader>
             <CardTitle>בחירת קורסים להנחייה מוגברת</CardTitle>
             <div className="flex gap-2 mt-2">
-              <button 
-                onClick={() => handleSelectAllCourses(true)}
-                className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
+              <Button onClick={() => handleSelectAllCourses(true)} variant="outline">
                 בחר הכל
-              </button>
-              <button 
-                onClick={() => handleSelectAllCourses(false)}
-                className="px-3 py-1 text-sm bg-gray-500 text-white rounded hover:bg-gray-600"
-              >
+              </Button>
+              <Button onClick={() => handleSelectAllCourses(false)} variant="outline">
                 נקה הכל
-              </button>
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {syllabusData.map(year => 
-                Object.values(year.semesters).flat().map(course => 
-                  course.courseNumber && !course.courseNumber.includes('אנגלית') && (
-                    <div key={course.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={course.id}
-                        checked={selectedCourses.includes(course.id)}
-                        onCheckedChange={(checked) => {
-                          if (checked) {
-                            setSelectedCourses([...selectedCourses, course.id])
-                          } else {
-                            setSelectedCourses(selectedCourses.filter(id => id !== course.id))
-                          }
-                        }}
-                      />
-                      <label htmlFor={course.id} className="text-sm">
-                        {course.name}
-                      </label>
-                    </div>
-                  )
-                )
-              )}
-            </div>
+            <Accordion type="multiple" className="w-full">
+              {syllabusData.map((year) => (
+                <AccordionItem value={year.id} key={year.id}>
+                  <AccordionTrigger>{year.name}</AccordionTrigger>
+                  <AccordionContent>
+                    {Object.entries(year.semesters).map(([semester, courses]) => (
+                      <div key={`${year.id}-${semester}`} className="mb-4">
+                        <h4 className="font-semibold mb-2">{semester}</h4>
+                        {courses
+                          .filter(course => course.courseNumber && !course.courseNumber.includes('אנגלית'))
+                          .map(course => (
+                            <div key={course.id} className="flex items-center space-x-2 mb-1">
+                              <Checkbox
+                                id={course.id}
+                                checked={selectedCourses.includes(course.id)}
+                                onCheckedChange={(checked) => {
+                                  if (checked) {
+                                    setSelectedCourses([...selectedCourses, course.id])
+                                  } else {
+                                    setSelectedCourses(selectedCourses.filter(id => id !== course.id))
+                                  }
+                                }}
+                              />
+                              <label htmlFor={course.id} className="text-sm">
+                                {course.name} ({course.courseNumber})
+                              </label>
+                            </div>
+                          ))
+                        }
+                      </div>
+                    ))}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
           </CardContent>
         </Card>
       </div>
     </div>
   )
-} 
+}
+
