@@ -37,7 +37,7 @@ const SummaryRow: React.FC<SummaryRowProps> = ({ label, value, isTotal }) => (
 export default function Calculator() {
   const [selectedCourses, setSelectedCourses] = useState<string[]>([])
   const [englishCourses, setEnglishCourses] = useState(0)
-  const [includeAccounting, setIncludeAccounting] = useState(false)
+  const [includeAccounting, setIncludeAccounting] = useState(true)
   
   const regularCourses = syllabusData.reduce((total, year) => {
     return total + Object.values(year.semesters).reduce((semTotal, courses) => {
@@ -131,8 +131,8 @@ export default function Calculator() {
                 </TableHeader>
                 <TableBody>
                   <SummaryRow label={`קורסים (${regularCourses})`} value={baseCost} />
-                  <SummaryRow label="דמי אבטחה לקורס" value={securityCost} />
-                  <SummaryRow label="תוספת קיץ" value={summerCost} />
+                  <SummaryRow label="דמי אבטחה" value={securityCost} />
+                  <SummaryRow label={`תוספת קיץ (${summerSemesters} סמסטרים)`} value={summerCost} />
                   <SummaryRow label={`הנחייה מוגברת (${selectedCourses.length} קורסים)`} value={extraGuidanceCost} />
                   <SummaryRow label="סה״כ" value={totalMainCost} isTotal />
                 </TableBody>
@@ -154,7 +154,6 @@ export default function Calculator() {
                 </TableHeader>
                 <TableBody>
                   <SummaryRow label={`קורסים נוספים (${COSTS.additionalCoursesCount})`} value="0" />
-                  <SummaryRow label="הנחייה מוגברת" value={additionalGuidanceCost} />
                   <TableRow>
                     <TableCell>
                       <div className="flex items-center gap-2">
@@ -230,7 +229,11 @@ export default function Calculator() {
                       <div key={`${year.id}-${semester}`} className="mb-4">
                         <h4 className="font-semibold mb-2">{semester}</h4>
                         {courses
-                          .filter(course => course.courseNumber && !course.courseNumber.includes('אנגלית'))
+                          .filter(course => 
+                            course.courseNumber && 
+                            !course.courseNumber.includes('אנגלית') &&
+                            course.courseNumber !== '91440'
+                          )
                           .map(course => (
                             <div key={course.id} className="flex items-center space-x-2 mb-1">
                               <Checkbox
