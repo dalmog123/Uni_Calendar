@@ -5,7 +5,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautif
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Course, Year, syllabusData } from './data'
+import { Course, Year, syllabusPlans } from './data'
 
 const SyllabusSelector: React.FC<{ selectedPlan: string; onPlanChange: (value: string) => void }> = ({ selectedPlan, onPlanChange }) => {
   return (
@@ -152,13 +152,12 @@ const YearCard: React.FC<{ year: Year }> = ({ year }) => (
 )
 
 export default function Syllabus() {
-  const [selectedPlan, setSelectedPlan] = useState('3.5-first')
-  const [syllabusState, setSyllabusState] = useState(syllabusData)
+  const [selectedPlan, setSelectedPlan] = useState<string>('3.5-first')
+  const [syllabusState, setSyllabusState] = useState(() => syllabusPlans['3.5-first'])
 
   const handlePlanChange = (value: string) => {
     setSelectedPlan(value)
-    // Here you would load the appropriate syllabus data based on the selected plan
-    // For now, we'll keep using the same syllabusData
+    setSyllabusState(syllabusPlans[value as keyof typeof syllabusPlans])
   }
 
   const onDragEnd = (result: DropResult) => {
