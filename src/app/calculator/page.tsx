@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -34,10 +34,42 @@ const SummaryRow: React.FC<SummaryRowProps> = ({ label, value, isTotal }) => (
   </TableRow>
 )
 
+const areAllCoursesInYearSelected = (year: typeof syllabusData[0], selectedCourses: string[]) => {
+  const coursesInYear = Object.values(year.semesters)
+    .flat()
+    .filter(course => 
+      course.courseNumber && 
+      !course.courseNumber.includes('אנגלית') &&
+      course.courseNumber !== '91440'
+    )
+  
+  return coursesInYear.length > 0 && 
+    coursesInYear.every(course => selectedCourses.includes(course.id))
+}
+
 export default function Calculator() {
   const [selectedCourses, setSelectedCourses] = useState<string[]>([])
   const [englishCourses, setEnglishCourses] = useState(0)
   const [includeAccounting, setIncludeAccounting] = useState(true)
+  const [isOriginalSummaryVisible, setIsOriginalSummaryVisible] = useState(true)
+  const summaryRef = useRef<HTMLTableRowElement>(null)
+  
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsOriginalSummaryVisible(entry.isIntersecting)
+      },
+      {
+        threshold: 0,
+      }
+    )
+
+    if (summaryRef.current) {
+      observer.observe(summaryRef.current)
+    }
+
+    return () => observer.disconnect()
+  }, [])
   
   const regularCourses = syllabusData.reduce((total, year) => {
     return total + Object.values(year.semesters).reduce((semTotal, courses) => {
@@ -88,7 +120,23 @@ export default function Calculator() {
 
   return (
     <div className="container mx-auto p-4 py-8 max-w-4xl" dir="rtl">
-      <h1 className="text-3xl font-bold mb-8">חישוב עלות תואר</h1>
+      {!isOriginalSummaryVisible && (
+        <div className="fixed top-16 left-0 right-0 bg-background border-b z-40 shadow-md">
+          <div className="container mx-auto p-4 max-w-4xl">
+            <div className="flex justify-between items-center">
+              <span className="font-bold">סה״כ עלות התואר:</span>
+              <span className="font-bold text-xl">{totalCost.toLocaleString()} ₪</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-2 mb-8">
+        <h1 className="text-4xl font-bold text-right">חישוב עלות תואר</h1>
+        <p className="text-xl text-gray-600 text-right">
+          חישוב מקורב של עלות התואר
+        </p>
+      </div>
 
       <div className="grid gap-6">
         <Card>
@@ -110,7 +158,10 @@ export default function Calculator() {
                   (includeAccounting ? COSTS.accountingExemption : 0) + 
                   COSTS.registration + 
                   (COSTS.studentOrg * studyYears)} />
-                <SummaryRow label="סה״כ עלות התואר" value={totalCost} isTotal />
+                <TableRow ref={summaryRef}>
+                  <TableCell className="font-bold">סה״כ עלות התואר</TableCell>
+                  <TableCell className="text-right font-bold">{totalCost.toLocaleString()}</TableCell>
+                </TableRow>
               </TableBody>
             </Table>
             <div className="text-xs text-muted-foreground mt-4 text-right">
@@ -163,7 +214,7 @@ export default function Calculator() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  <SummaryRow label={`קורסים נוספים (${COSTS.additionalCoursesCount})`} value="0" />
+                  <SummaryRow label={`קורסי נוספים (${COSTS.additionalCoursesCount})`} value="0" />
                   <TableRow>
                     <TableCell>
                       <div className="flex items-center gap-2">
@@ -233,7 +284,14 @@ export default function Calculator() {
             <Accordion type="multiple" className="w-full">
               {syllabusData.map((year) => (
                 <AccordionItem value={year.id} key={year.id}>
-                  <AccordionTrigger>{year.name}</AccordionTrigger>
+                  <AccordionTrigger className="group">
+                    <div className="flex items-center gap-2">
+                      {areAllCoursesInYearSelected(year, selectedCourses) && (
+                        <div className="h-2 w-2 rounded-full bg-primary" />
+                      )}
+                      <span>{year.name}</span>
+                    </div>
+                  </AccordionTrigger>
                   <AccordionContent>
                     {Object.entries(year.semesters).map(([semester, courses]) => (
                       <div key={`${year.id}-${semester}`} className="mb-4">
