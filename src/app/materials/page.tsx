@@ -10,7 +10,8 @@ import {
   File,
   Archive,
   ChevronLeft,
-  Table
+  Table,
+  X
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { useState, useEffect } from "react"
@@ -107,8 +108,10 @@ export default function MaterialsPage() {
 
   const handleItemClick = (item: DriveItem) => {
     if (item.type === 'folder') {
-      setFolderPath(prev => [...prev, { id: item.id, name: item.name }])
-      setCurrentFolderId(item.id)
+      if (folderPath.length === 0 || folderPath[folderPath.length - 1].id !== item.id) {
+        setFolderPath(prev => [...prev, { id: item.id, name: item.name }])
+        setCurrentFolderId(item.id)
+      }
     } else {
       window.open(`https://drive.google.com/file/d/${item.id}/view`, '_blank')
     }
@@ -130,14 +133,6 @@ export default function MaterialsPage() {
   const filteredItems = items.filter(item => 
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   )
-
-  if (loading && isInitialLoad) {
-    return (
-      <div className="container mx-auto p-4 py-12 max-w-7xl" dir="rtl">
-        <div>טוען...</div>
-      </div>
-    )
-  }
 
   return (
     <div className="container mx-auto p-4 py-12 max-w-7xl" dir="rtl">
@@ -169,53 +164,71 @@ export default function MaterialsPage() {
         ))}
       </div>
 
-      <div className="mb-8">
+      <div className="mb-8 relative max-w-md">
         <Input
           type="text"
           placeholder="חיפוש..."
-          className="max-w-md"
+          className="pr-8"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery("")}
+            className="absolute left-2 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full"
+          >
+            <X className="h-4 w-4 text-gray-500" />
+          </button>
+        )}
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredItems.map((item) => (
-          <button 
-            key={item.id}
-            onClick={() => handleItemClick(item)}
-            className="text-left w-full"
-          >
-            <Card className={`
-              hover:shadow-lg transition-all hover:scale-102 h-full flex flex-col
-              ${item.type === 'file' ? 'bg-gray-50' : ''} 
-            `}>
-              <CardHeader className="flex-grow">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  {item.type === 'folder' ? (
-                    <FolderIcon className="h-5 w-5 flex-shrink-0 text-blue-500" />
-                  ) : (
-                    getFileIcon(item.mimeType).icon
-                  )}
-                  {item.name}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <p className={`text-sm ${
-                  item.type === 'file' 
-                    ? 'text-gray-600' 
-                    : 'text-gray-500'
-                }`}>
-                  {item.type === 'folder' 
-                    ? 'לחץ לפתיחת התיקייה' 
-                    : `לחץ לפתיחת ${getFileIcon(item.mimeType).text}`
-                  }
-                </p>
-              </CardContent>
-            </Card>
-          </button>
-        ))}
-      </div>
+      {loading && isInitialLoad ? (
+        <div className="text-center">טוען...</div>
+      ) : filteredItems.length === 0 ? (
+        <div className="text-center text-gray-500">
+          {searchQuery 
+            ? "לא נמצאו תוצאות לחיפוש זה" 
+            : "התיקייה ריקה"}
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredItems.map((item) => (
+            <button 
+              key={item.id}
+              onClick={() => handleItemClick(item)}
+              className="text-left w-full"
+            >
+              <Card className={`
+                hover:shadow-lg transition-all hover:scale-102 h-full flex flex-col
+                ${item.type === 'file' ? 'bg-gray-50' : ''} 
+              `}>
+                <CardHeader className="flex-grow">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    {item.type === 'folder' ? (
+                      <FolderIcon className="h-5 w-5 flex-shrink-0 text-blue-500" />
+                    ) : (
+                      getFileIcon(item.mimeType).icon
+                    )}
+                    {item.name}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <p className={`text-sm ${
+                    item.type === 'file' 
+                      ? 'text-gray-600' 
+                      : 'text-gray-500'
+                  }`}>
+                    {item.type === 'folder' 
+                      ? 'לחץ לפתיחת התיקייה' 
+                      : `לחץ לפתיחת ${getFileIcon(item.mimeType).text}`
+                    }
+                  </p>
+                </CardContent>
+              </Card>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   )
 } 

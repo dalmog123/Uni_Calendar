@@ -159,7 +159,11 @@ export function CalendarView() {
   }
 
   return (
-    <div className="container mx-auto p-4 space-y-6" dir="rtl">
+    <div className="container mx-auto p-4 py-8 max-w-6xl" dir="rtl">
+      <div className="space-y-2 mb-8">
+        <h1 className="text-4xl font-bold text-right">יצירת לוח שנה</h1>
+      </div>
+
       <div className="space-y-4">
         <div>
           <Label htmlFor="courseName">שם קורס</Label>

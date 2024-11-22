@@ -11,7 +11,7 @@ export default function Home() {
         <h1 className="text-5xl font-bold text-center">ברוכים הבאים ל-UniCalendar</h1>
         
         <p className="text-xl text-center text-gray-600 max-w-3xl mx-auto">
-          המערכת המושלמת לניהול הצרכים האקדמיים שלך באוניברסיטה הפתוחה
+          המערכת המושלמת לסטודנטים לחשבונאות באוניברסיטה הפתוחה
         </p>
       </div>
 

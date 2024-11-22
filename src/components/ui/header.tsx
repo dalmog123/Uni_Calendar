@@ -11,7 +11,7 @@ export function Header() {
   const pathname = usePathname()
 
   return (
-    <header className="border-b">
+    <header className="border-b sticky top-0 bg-background z-50">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
