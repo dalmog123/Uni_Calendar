@@ -136,6 +136,132 @@ export default function Home() {
           </div>
         ))}
       </div>
+
+      <div className="mt-16">
+        <h2 className="text-2xl font-bold text-center mb-6">קישורים שימושיים</h2>
+        
+        <div className="flex flex-wrap justify-center gap-4">
+          <a 
+            href="https://www.openu.ac.il/registration/sesoneanddates/pages/default.aspx"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-[15px] md:text-sm text-primary hover:text-primary/80 bg-primary/10 px-2 py-1.5 md:px-3 md:py-2 rounded-md transition-colors"
+          >
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="14" 
+              height="14" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            >
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+            מידע על תקופות הרשמה ומועדי הרשמה
+          </a>
+
+          <a 
+            href="https://www.openu.ac.il/registration/payments/tables/pages/default.aspx"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-[15px] md:text-sm text-primary hover:text-primary/80 bg-primary/10 px-2 py-1.5 md:px-3 md:py-2 rounded-md transition-colors"
+          >
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="14" 
+              height="14" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            >
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+            טבלאות שכר לימוד ותשלומים
+          </a>
+
+          <a 
+            href="https://www.openu.ac.il"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-[15px] md:text-sm text-primary hover:text-primary/80 bg-primary/10 px-2 py-1.5 md:px-3 md:py-2 rounded-md transition-colors"
+          >
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="14" 
+              height="14" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            >
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+            האוניברסיטה הפתוחה
+          </a>
+
+          <a 
+            href="https://www.openu.ac.il/dean-students/scholarships/pages/default.aspx"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-[15px] md:text-sm text-primary hover:text-primary/80 bg-primary/10 px-2 py-1.5 md:px-3 md:py-2 rounded-md transition-colors"
+          >
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="14" 
+              height="14" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            >
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+            מלגות
+          </a>
+
+          <a 
+            href="https://www.bpracti.co.il/cpa-salary-survey/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-[15px] md:text-sm text-primary hover:text-primary/80 bg-primary/10 px-2 py-1.5 md:px-3 md:py-2 rounded-md transition-colors"
+          >
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="14" 
+              height="14" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            >
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+            סקר שכר רואי חשבון
+          </a>
+        </div>
+      </div>
     </div>
   )
 }
