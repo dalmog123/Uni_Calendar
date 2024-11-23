@@ -39,7 +39,7 @@ export default function Home() {
             href: "/calendar",
             icon: CalendarDays,
             title: "לוח שנה",
-            description: "נהל את לוח הזמנים שלך, מעקב אחר מטלות ומועדי מפגשים",
+            description: "הוספת מועדי מפגשים ומטלות ללוח השנה שלך",
             disabled: false
           },
           {
@@ -47,7 +47,7 @@ export default function Home() {
             href: "/syllabus",
             icon: BookOpen,
             title: "סילבוס",
-            description: "צפה בתכנית הלימודים המלאה ומידע על הקורסים",
+            description: "צפייה בתכנית הלימודים המלאה ומידע על הקורסים",
             disabled: false
           },
           {
@@ -63,7 +63,7 @@ export default function Home() {
             href: "/calculator",
             icon: Calculator,
             title: "מחשבון עלות תואר",
-            description: "חשב את העלות המוערכת שהתואר יעלה לך",
+            description: "לחישוב העלות המוערכת שהתואר יעלה לך",
             disabled: false
           },
           {
@@ -71,7 +71,7 @@ export default function Home() {
             href: "#",
             icon: Users,
             title: "ללמוד ביחד",
-            description: "מצא שותפים ללימוד משותף בקורסים שלך (בקרוב)",
+            description: "למציאת סטודנטים ללימוד משותף בקורסים שלך (בקרוב)",
             disabled: true
           },
           {
@@ -79,7 +79,7 @@ export default function Home() {
             href: "#",
             icon: Recycle,
             title: "שומרים על הכדור",
-            description: "תרום ספרי לימוד משומשים לסטודנטים אחרים (בקרוב)",
+            description: "לתרומת ספרי לימוד משומשים לסטודנטים אחרים (בקרוב)",
             disabled: true
           },
           {

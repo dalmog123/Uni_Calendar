@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Header } from "@/components/ui/header"
+import { Analytics } from '@vercel/analytics/react'
 
 export const metadata: Metadata = {
   title: "UniCalendar",
@@ -21,6 +22,7 @@ export default function RootLayout({
             {children}
           </main>
         </div>
+        <Analytics />
       </body>
     </html>
   )
