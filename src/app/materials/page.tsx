@@ -15,6 +15,7 @@ import {
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
 
 interface DriveItem {
   id: string
@@ -64,6 +65,16 @@ const getFileIcon = (mimeType: string) => {
   }
 }
 
+// Add this constant for the course numbers
+const FINANCIAL_ACCOUNTING_COURSES = ["10863", "10864", "10865", "10866", "10867", "10868"]
+const TAX_COURSES = ["10870", "10871", "10872", "10873"]
+const AUDIT_COURSES = ["10874", "10875", "10876"]
+const LAW_COURSES = ["10836", "10877"]
+const IT_COURSES = ["10645", "10878", "10596"]
+const INTERDISCIPLINARY_COURSES = ["10860", "10861", "10862"]
+const ECONOMICS_FINANCE_COURSES = ["10131", "10126", "10230", "10284", "10887"]
+const FOUNDATION_COURSES = ["10142", "30111", "30112", "91419"]
+
 export default function MaterialsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [items, setItems] = useState<DriveItem[]>([])
@@ -71,6 +82,7 @@ export default function MaterialsPage() {
   const [isInitialLoad, setIsInitialLoad] = useState(true)
   const [currentFolderId, setCurrentFolderId] = useState<string>("1TRIeBJBEHbUqECwKwDGXoSfqRmRlajhI")
   const [folderPath, setFolderPath] = useState<Array<{ id: string, name: string }>>([])
+  const [activeFilter, setActiveFilter] = useState<string | null>(null)
 
   useEffect(() => {
     fetchItems(currentFolderId)
@@ -109,8 +121,11 @@ export default function MaterialsPage() {
   const handleItemClick = (item: DriveItem) => {
     if (item.type === 'folder') {
       if (folderPath.length === 0 || folderPath[folderPath.length - 1].id !== item.id) {
-        setFolderPath(prev => [...prev, { id: item.id, name: item.name }])
-        setCurrentFolderId(item.id)
+        setLoading(true);
+        const newPath = [...folderPath, { id: item.id, name: item.name }];
+        setFolderPath(newPath);
+        setCurrentFolderId(item.id);
+        setSearchQuery("");
       }
     } else {
       window.open(`https://drive.google.com/file/d/${item.id}/view`, '_blank')
@@ -130,9 +145,48 @@ export default function MaterialsPage() {
     }
   }
 
-  const filteredItems = items.filter(item => 
-    item.name.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  // Modify the filter handling to include tax courses
+  const handleFilterClick = (filterType: string) => {
+    setSearchQuery("")
+    if (activeFilter === filterType) {
+      setActiveFilter(null)
+    } else {
+      setActiveFilter(filterType)
+    }
+  }
+
+  // Modify the filtering logic to only apply filters at the root level
+  const filteredItems = items.filter(item => {
+    // If we're in a subfolder (folderPath.length > 0), show all items
+    if (folderPath.length > 0) {
+      if (searchQuery) {
+        return item.name.toLowerCase().includes(searchQuery.toLowerCase())
+      }
+      return true
+    }
+
+    // Only apply course filters at the root level
+    if (activeFilter) {
+      const coursesToFilter = 
+        activeFilter === 'financial' ? FINANCIAL_ACCOUNTING_COURSES 
+        : activeFilter === 'tax' ? TAX_COURSES
+        : activeFilter === 'audit' ? AUDIT_COURSES
+        : activeFilter === 'law' ? LAW_COURSES
+        : activeFilter === 'it' ? IT_COURSES
+        : activeFilter === 'interdisciplinary' ? INTERDISCIPLINARY_COURSES
+        : activeFilter === 'economics' ? ECONOMICS_FINANCE_COURSES
+        : FOUNDATION_COURSES
+      const filterPattern = coursesToFilter.join("|")
+      const regex = new RegExp(filterPattern)
+      if (!regex.test(item.name)) return false
+    }
+    
+    if (searchQuery) {
+      return item.name.toLowerCase().includes(searchQuery.toLowerCase())
+    }
+    
+    return true
+  })
 
   return (
     <div className="container mx-auto p-4 py-12 max-w-7xl" dir="rtl">
@@ -182,7 +236,66 @@ export default function MaterialsPage() {
         )}
       </div>
 
-      {loading && isInitialLoad ? (
+      <div className="mb-6 flex flex-wrap gap-2">
+        <Button 
+          variant={activeFilter === 'financial' ? "default" : "outline"}
+          onClick={() => handleFilterClick('financial')}
+          className="text-[15px] md:text-sm"
+        >
+          חשבונאות פיננסית
+        </Button>
+        <Button 
+          variant={activeFilter === 'tax' ? "default" : "outline"}
+          onClick={() => handleFilterClick('tax')}
+          className="text-[15px] md:text-sm"
+        >
+          מיסים
+        </Button>
+        <Button 
+          variant={activeFilter === 'audit' ? "default" : "outline"}
+          onClick={() => handleFilterClick('audit')}
+          className="text-[15px] md:text-sm"
+        >
+          ביקורת חשבונות
+        </Button>
+        <Button 
+          variant={activeFilter === 'law' ? "default" : "outline"}
+          onClick={() => handleFilterClick('law')}
+          className="text-[15px] md:text-sm"
+        >
+          משפט
+        </Button>
+        <Button 
+          variant={activeFilter === 'it' ? "default" : "outline"}
+          onClick={() => handleFilterClick('it')}
+          className="text-[15px] md:text-sm"
+        >
+          מערכות מידע ואבטחת סייבר
+        </Button>
+        <Button 
+          variant={activeFilter === 'interdisciplinary' ? "default" : "outline"}
+          onClick={() => handleFilterClick('interdisciplinary')}
+          className="text-[15px] md:text-sm"
+        >
+          לימודים בינתחומיים בכלכלה ניהול וחשבונאות
+        </Button>
+        <Button 
+          variant={activeFilter === 'economics' ? "default" : "outline"}
+          onClick={() => handleFilterClick('economics')}
+          className="text-[15px] md:text-sm"
+        >
+          כלכלה ומימון
+        </Button>
+        <Button 
+          variant={activeFilter === 'foundation' ? "default" : "outline"}
+          onClick={() => handleFilterClick('foundation')}
+          className="text-[15px] md:text-sm"
+        >
+          לימודי תשתית
+        </Button>
+      </div>
+
+      {loading ? (
         <div className="text-center">טוען...</div>
       ) : filteredItems.length === 0 ? (
         <div className="text-center text-gray-500">
