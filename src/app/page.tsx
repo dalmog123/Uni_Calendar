@@ -17,7 +17,7 @@ export default function Home() {
 
       <div className="mb-16 text-center">
         <Link 
-          href="https://chat.whatsapp.com/JBn7Fw4pq5o7pGD1ECV8zj" 
+          href="https://docs.google.com/forms/d/e/1FAIpQLSfBZS2QAt6jeDXFKRP2vik0Nl3iav9Em9B_nO7YEZswI-ZqpA/viewform" 
           target="_blank" 
           rel="noopener noreferrer"
           className="inline-block"

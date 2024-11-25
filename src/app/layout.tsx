@@ -3,6 +3,7 @@ import "./globals.css";
 import { Header } from "@/components/ui/header"
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Footer } from '@/components/footer'
 
 export const metadata: Metadata = {
   title: "UniCalendar",
@@ -16,13 +17,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="he" dir="rtl">
-      <body>
-        <div className="min-h-screen flex flex-col">
-          <Header />
-          <main className="flex-1">
-            {children}
-          </main>
-        </div>
+      <body className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-grow">
+          {children}
+        </main>
+        <Footer />
         <Analytics />
         <SpeedInsights />
       </body>

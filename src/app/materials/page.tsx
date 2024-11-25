@@ -304,43 +304,58 @@ export default function MaterialsPage() {
             : "התיקייה ריקה"}
         </div>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredItems.map((item) => (
-            <button 
-              key={item.id}
-              onClick={() => handleItemClick(item)}
-              className="text-left w-full"
+        <>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredItems.map((item) => (
+              <button 
+                key={item.id}
+                onClick={() => handleItemClick(item)}
+                className="text-left w-full"
+              >
+                <Card className={`
+                  hover:shadow-lg transition-all hover:scale-102 h-full flex flex-col
+                  ${item.type === 'file' ? 'bg-gray-50' : ''} 
+                `}>
+                  <CardHeader className="flex-grow">
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      {item.type === 'folder' ? (
+                        <FolderIcon className="h-5 w-5 flex-shrink-0 text-blue-500" />
+                      ) : (
+                        getFileIcon(item.mimeType).icon
+                      )}
+                      {item.name}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <p className={`text-sm ${
+                      item.type === 'file' 
+                        ? 'text-gray-600' 
+                        : 'text-gray-500'
+                    }`}>
+                      {item.type === 'folder' 
+                        ? 'לחץ לפתיחת התיקייה' 
+                        : `לחץ לפתיחת ${getFileIcon(item.mimeType).text}`
+                      }
+                    </p>
+                  </CardContent>
+                </Card>
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-12 text-center space-y-4">
+            <Button
+              variant="default"
+              className="text-[15px] md:text-sm"
+              onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSfOQA7zNgV_Iu8oFdt4khlmDFGOBkxIXHiKtcUEUH_tYeHeJw/viewform', '_blank')}
             >
-              <Card className={`
-                hover:shadow-lg transition-all hover:scale-102 h-full flex flex-col
-                ${item.type === 'file' ? 'bg-gray-50' : ''} 
-              `}>
-                <CardHeader className="flex-grow">
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    {item.type === 'folder' ? (
-                      <FolderIcon className="h-5 w-5 flex-shrink-0 text-blue-500" />
-                    ) : (
-                      getFileIcon(item.mimeType).icon
-                    )}
-                    {item.name}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <p className={`text-sm ${
-                    item.type === 'file' 
-                      ? 'text-gray-600' 
-                      : 'text-gray-500'
-                  }`}>
-                    {item.type === 'folder' 
-                      ? 'לחץ לפתיחת התיקייה' 
-                      : `לחץ לפתיחת ${getFileIcon(item.mimeType).text}`
-                    }
-                  </p>
-                </CardContent>
-              </Card>
-            </button>
-          ))}
-        </div>
+              רוצה לשתף חומרי לימוד? לחץ כאן
+            </Button>
+            <p className="text-sm text-gray-500">
+              כל הקבצים המוצגים כאן הם ייצוג ויזואלי של תיקיית Google Drive המנוהלת על ידי הסטודנטים. האתר אינו אחראי על הפרת זכויות יוצרים כלשהי
+            </p>
+          </div>
+        </>
       )}
     </div>
   )
