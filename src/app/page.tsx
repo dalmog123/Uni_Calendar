@@ -6,6 +6,7 @@ import {
   BookOpen,
   Library,
   Calculator,
+  TimerIcon,
   Users,
   Recycle,
   MapPin,
@@ -94,6 +95,16 @@ export default function Home() {
               gradient: "from-orange-500 to-red-500",
             },
             {
+              id: "timer",
+              href: "/timer",
+              icon: TimerIcon,
+              title: "טיימר לימודים",
+              description: "טיימר למבחנים ולמידה שישפר לכם את הפוקוס ",
+              disabled: false,
+              gradient: "from-violet-500 to-purple-500",
+              isNew: true,
+            },
+            {
               id: "study-together",
               href: "#",
               icon: Users,
@@ -135,10 +146,8 @@ export default function Home() {
                 <div className="relative w-full">
                   <Card className="h-full bg-white/60 backdrop-blur-sm border-slate-200 transition-all duration-300 flex flex-col">
                     <CardHeader className="pb-4 flex-shrink-0">
-                      <div
-                        className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${item.gradient} opacity-50 flex items-center justify-center mb-4 mx-auto`}
-                      >
-                        <item.icon className="h-8 w-8 text-white" />
+                      <div className="w-16 h-16 rounded-2xl bg-slate-300 flex items-center justify-center mb-4 mx-auto">
+                        <item.icon className="h-8 w-8 text-slate-500" />
                       </div>
                       <CardTitle className="text-xl text-center text-slate-400">{item.title}</CardTitle>
                     </CardHeader>
@@ -151,25 +160,34 @@ export default function Home() {
                   </div>
                 </div>
               ) : (
-                <Link href={item.href} className="block h-full w-full">
-                  <Card className="h-full bg-white/80 backdrop-blur-sm border-slate-200 hover:bg-white hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 hover:-translate-y-2 group-hover:border-slate-300 flex flex-col">
-                    <CardHeader className="pb-4 flex-shrink-0">
-                      <div
-                        className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300 shadow-lg`}
-                      >
-                        <item.icon className="h-8 w-8 text-white" />
+                <div className="relative w-full">
+                  <Link href={item.href} className="block h-full w-full">
+                    <Card className="h-full bg-white/80 backdrop-blur-sm border-slate-200 hover:bg-white hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 hover:-translate-y-2 group-hover:border-slate-300 flex flex-col">
+                      <CardHeader className="pb-4 flex-shrink-0">
+                        <div
+                          className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300 shadow-lg`}
+                        >
+                          <item.icon className="h-8 w-8 text-white" />
+                        </div>
+                        <CardTitle className="text-xl text-center text-slate-800 group-hover:text-slate-900">
+                          {item.title}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-0 flex-grow flex items-center">
+                        <p className="text-slate-600 text-center leading-relaxed group-hover:text-slate-700">
+                          {item.description}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                  {item.isNew && (
+                    <div className="absolute -top-2 -left-2 z-10">
+                      <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg border-2 border-white transform rotate-12 hover:rotate-0 transition-transform duration-300">
+                        חדש
                       </div>
-                      <CardTitle className="text-xl text-center text-slate-800 group-hover:text-slate-900">
-                        {item.title}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-0 flex-grow flex items-center">
-                      <p className="text-slate-600 text-center leading-relaxed group-hover:text-slate-700">
-                        {item.description}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </Link>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           ))}

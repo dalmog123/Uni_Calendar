@@ -3,7 +3,7 @@
 import { Button } from "./button"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { CalendarDays, BookOpen, Library, Calculator, Menu, Home } from "lucide-react"
+import { CalendarDays, BookOpen, Library, Calculator, Menu, Home, Timer as TimerIcon } from "lucide-react"
 import { useState } from "react"
 
 export function Header() {
@@ -71,14 +71,22 @@ export function Header() {
                 <Library className="h-4 w-4" />
                 חומרי לימוד
               </Button>
-            </Link>
-            <Link href="/calculator">
+            </Link>            <Link href="/calculator">
               <Button 
                 variant={pathname === "/calculator" ? "default" : "ghost"} 
                 className="flex items-center gap-2"
               >
                 <Calculator className="h-4 w-4" />
                 חישוב עלות תואר
+              </Button>
+            </Link>
+            <Link href="/timer">
+              <Button 
+                variant={pathname === "/timer" ? "default" : "ghost"} 
+                className="flex items-center gap-2"
+              >
+                <TimerIcon className="h-4 w-4" />
+                טיימר
               </Button>
             </Link>
           </nav>
@@ -113,14 +121,22 @@ export function Header() {
                 <Library className="h-4 w-4" />
                 חומרי לימוד
               </Button>
-            </Link>
-            <Link href="/calculator" className="block" onClick={() => setIsMenuOpen(false)}>
+            </Link>            <Link href="/calculator" className="block" onClick={() => setIsMenuOpen(false)}>
               <Button 
                 variant={pathname === "/calculator" ? "default" : "ghost"} 
                 className="w-full justify-start gap-2"
               >
                 <Calculator className="h-4 w-4" />
                 חישוב עלות תואר
+              </Button>
+            </Link>
+            <Link href="/timer" className="block" onClick={() => setIsMenuOpen(false)}>
+              <Button 
+                variant={pathname === "/timer" ? "default" : "ghost"} 
+                className="w-full justify-start gap-2"
+              >
+                <TimerIcon className="h-4 w-4" />
+                טיימר
               </Button>
             </Link>
           </nav>
