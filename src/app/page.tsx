@@ -17,7 +17,7 @@ import { BsWhatsapp } from "react-icons/bs"
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 font-sans" dir="rtl">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 font-sans overflow-x-hidden" dir="rtl">
       {/* Hero Section */}
       <div className="container mx-auto px-2 sm:px-4 pt-16 pb-12 max-w-7xl">
         <div className="text-center space-y-8 mb-20">
