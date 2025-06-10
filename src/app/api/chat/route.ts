@@ -135,20 +135,53 @@ ${conversationContext}
               maxOutputTokens: 1024,
             },
           }),
-        },
+        }
       )
 
       if (!response.ok) {
-        const errorData = await response.json()
-        console.error("Gemini API Error:", errorData)
+        let errorMessage = "שגיאה בתקשורת עם מנוע ה-AI"
+        try {
+          const errorData = await response.text() // Use text() instead of json()
+          console.error("Gemini API Error:", errorData)
+          // Only try to parse as JSON if it looks like JSON
+          if (errorData.startsWith("{")) {
+            const jsonError = JSON.parse(errorData)
+            if (jsonError.error?.message) {
+              errorMessage = `שגיאת AI: ${jsonError.error.message}`
+            }
+          }
+        } catch (e) {
+          console.error("Failed to parse error response:", e)
+        }
         return NextResponse.json(
-          { error: "שגיאה בתקשורת עם מנוע ה-AI" },
+          { error: errorMessage },
           { status: response.status }
         )
       }
 
-      const data = await response.json()
-      const fullResponse = data.candidates?.[0]?.content?.parts?.[0]?.text
+      let data
+      try {
+        const rawResponse = await response.text() // First get as text
+        console.log("Raw Gemini response:", rawResponse) // Log the raw response
+        data = JSON.parse(rawResponse) // Then parse as JSON
+      } catch (e) {
+        console.error("Failed to parse Gemini response:", e)
+        return NextResponse.json(
+          { error: "התקבלה תשובה לא תקינה מהשרת" },
+          { status: 500 }
+        )
+      }
+
+      // Validate response structure
+      if (!data?.candidates?.[0]?.content?.parts?.[0]) {
+        console.error("Unexpected response structure:", data)
+        return NextResponse.json(
+          { error: "מבנה התשובה מה-AI אינו תקין" },
+          { status: 500 }
+        )
+      }
+
+      const fullResponse = data.candidates[0].content.parts[0].text
 
       if (!fullResponse) {
         return NextResponse.json(
