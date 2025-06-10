@@ -18,7 +18,7 @@ import {
   BookOpen,
   Calculator,
   TrendingUp,
-  FileText,
+  Upload,
   Lightbulb,
   MessageCircle,
 } from "lucide-react"
@@ -336,14 +336,17 @@ export default function AITutor() {
                   onChange={handleImageUpload}
                   className="hidden"
                   ref={fileInputRef}
-                />
-                <Button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="rounded-full bg-slate-600 px-3 py-1.5 text-white shadow-md transition-all duration-200 ease-in-out hover:bg-slate-700"
-                >
-                  <FileText className="h-4 w-4" />
-                </Button>
+                />                <div className="relative">                  <Button
+                    type="button"
+                    disabled
+                    className="rounded-full bg-slate-400 px-3 py-1.5 text-white shadow-md transition-all duration-200 ease-in-out cursor-not-allowed"
+                  >
+                    <Upload className="h-4 w-4" />
+                  </Button>
+                  <div className="absolute -top-8 right-0 text-xs bg-slate-700 text-white px-2 py-1 rounded whitespace-nowrap">
+                    בקרוב
+                  </div>
+                </div>
                 <Input
                   ref={inputRef}
                   value={inputMessage}
