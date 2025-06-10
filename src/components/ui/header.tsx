@@ -3,13 +3,12 @@
 import { Button } from "./button"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { CalendarDays, BookOpen, Library, Calculator, Menu, Home, TimerIcon, X } from "lucide-react"
+import { CalendarDays, BookOpen, Library, Calculator, Menu, Home, TimerIcon, X, Cpu } from "lucide-react"
 import { useState } from "react"
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const pathname = usePathname()
-
   const navItems = [
     { href: "/", icon: Home, label: "דף הבית", gradient: "from-blue-500 to-cyan-500" },
     { href: "/calendar", icon: CalendarDays, label: "לוח שנה", gradient: "from-blue-500 to-cyan-500" },
@@ -17,6 +16,7 @@ export function Header() {
     { href: "/materials", icon: Library, label: "חומרי לימוד", gradient: "from-emerald-500 to-teal-500" },
     { href: "/calculator", icon: Calculator, label: "מחשבון עלות", gradient: "from-orange-500 to-red-500" },
     { href: "/timer", icon: TimerIcon, label: "טיימר", gradient: "from-violet-500 to-purple-500", isNew: true },
+    { href: "/chat", icon: Cpu, label: "AI חשבונאי", gradient: "from-green-600 to-emerald-500", isNew: true },
   ]
 
   return (
@@ -63,10 +63,9 @@ export function Header() {
                     <item.icon className="h-4 w-4" />
                     <span className="font-medium">{item.label}</span>
                   </Button>
-                </Link>
-                {item.isNew && (
-                  <div className="absolute -top-1 -left-1 z-10">
-                    <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-lg border border-white transform rotate-12">
+                </Link>                {item.isNew && (
+                  <div className="absolute -top-2 -left-2 z-10">
+                    <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-lg border border-white">
                       חדש
                     </div>
                   </div>

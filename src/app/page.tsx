@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import Link from "next/link"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
 import {
   CalendarDays,
   BookOpen,
@@ -12,10 +12,17 @@ import {
   MapPin,
   Briefcase,
   ExternalLink,
-} from "lucide-react"
-import { BsWhatsapp } from "react-icons/bs"
+} from "lucide-react";
+import { BsWhatsapp } from "react-icons/bs";
+import { Cpu, Lightbulb, LucideIcon } from "lucide-react";
 
-export default function Home() {
+export default function Home() {  const features: Array<{ icon: LucideIcon; text: string }> = [
+    { icon: BookOpen, text: "הסברים מפורטים" },
+    { icon: Calculator, text: "עזרה בתרגילים" },
+    { icon: Cpu, text: "בינה מלאכותית" },
+    { icon: Lightbulb, text: "טיפים למבחנים" },
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 font-sans overflow-x-hidden" dir="rtl">
       {/* Hero Section */}
@@ -31,28 +38,9 @@ export default function Home() {
               </div>
             </h1>
             <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto rounded-full"></div>
-          </div>
-
-          <p className="text-lg sm:text-xl md:text-2xl text-slate-600 max-w-4xl mx-auto leading-relaxed px-2 sm:px-4">
+          </div>          <p className="text-lg sm:text-xl md:text-2xl text-slate-600 max-w-4xl mx-auto leading-relaxed px-2 sm:px-4">
             המערכת המושלמת לסטודנטים לחשבונאות באוניברסיטה הפתוחה
           </p>
-
-          <div className="pt-8">
-            <Link
-              href="https://docs.google.com/forms/d/e/1FAIpQLSfBZS2QAt6jeDXFKRP2vik0Nl3iav9Em9B_nO7YEZswI-ZqpA/viewform"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block"
-            >
-              <Button
-                size="lg"
-                className="text-lg sm:text-xl px-6 py-6 sm:px-10 sm:py-8 rounded-2xl hover:scale-105 transition-all duration-300 bg-gradient-to-r from-[#25D366] to-[#128C7E] hover:from-[#128C7E] hover:to-[#075E54] shadow-lg hover:shadow-xl flex items-center gap-2 sm:gap-3 border-0"
-              >
-                <BsWhatsapp className="h-5 w-5 sm:h-7 sm:w-7" />
-                הצטרף לקבוצת ה WhatsApp
-              </Button>
-            </Link>
-          </div>
         </div>
 
         {/* Features Grid */}
@@ -159,8 +147,14 @@ export default function Home() {
                     בקרוב
                   </div>
                 </div>
-              ) : (
-                <div className="relative w-full">
+              ) : (                <div className="relative w-full">
+                  {item.isNew && (
+                    <div className="absolute -top-2 -left-2 z-10">
+                      <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg border-2 border-white animate-bounce">
+                        חדש
+                      </div>
+                    </div>
+                  )}
                   <Link href={item.href} className="block h-full w-full">
                     <Card className="h-full bg-white/80 backdrop-blur-sm border-slate-200 hover:bg-white hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 hover:-translate-y-2 group-hover:border-slate-300 flex flex-col">
                       <CardHeader className="pb-4 flex-shrink-0">
@@ -180,17 +174,74 @@ export default function Home() {
                       </CardContent>
                     </Card>
                   </Link>
-                  {item.isNew && (
-                    <div className="absolute -top-2 -left-2 z-10">
-                      <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg border-2 border-white transform rotate-12 hover:rotate-0 transition-transform duration-300">
-                        חדש
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
             </div>
-          ))}
+          ))}        </div>        {/* AI Teacher Showcase Section */}        <div className="mb-16">          <div className="relative p-4">            <Card className="max-w-3xl mx-auto bg-white/90 backdrop-blur-sm border-2 border-green-100/50 shadow-xl hover:shadow-2xl hover:shadow-green-500/20 transition-all duration-300 rounded-3xl hover:scale-[1.01]">
+              <div className="absolute top-3 left-3 z-20">
+                <div className="bg-gradient-to-r from-green-600 to-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg border-2 border-white animate-bounce">
+                  חדש
+                </div>
+              </div>
+              <div className="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-green-500 via-emerald-600 to-green-500 rounded-t-3xl"></div>
+              <CardContent className="p-8">
+                <div className="text-center space-y-6">
+                  <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent">
+                    כש-AI פוגש חשבונאות
+                  </h2>
+
+                  <div className="flex items-center justify-center gap-12 mb-2">
+                    <div className="text-center space-y-1">
+                      <div className="w-12 h-12 mx-auto rounded-2xl bg-gradient-to-br from-green-600 to-emerald-500 flex items-center justify-center shadow-lg">
+                        <BookOpen className="h-6 w-6 text-white" />
+                      </div>
+                      <p className="text-sm font-medium text-slate-700">הסברים מפורטים</p>
+                    </div>
+                    <div className="text-center space-y-1">
+                      <div className="w-12 h-12 mx-auto rounded-2xl bg-gradient-to-br from-green-600 to-emerald-500 flex items-center justify-center shadow-lg">
+                        <Calculator className="h-6 w-6 text-white" />
+                      </div>
+                      <p className="text-sm font-medium text-slate-700">עזרה בתרגילים</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-slate-50 to-green-50 rounded-xl p-4 max-w-md mx-auto border border-green-100">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-600 to-emerald-500 flex items-center justify-center flex-shrink-0 shadow-lg">
+                        <Lightbulb className="h-4 w-4 text-white" />
+                      </div>
+                      <p className="text-slate-800 font-medium">״איך מחשבים פחת שנתי?״</p>
+                    </div>
+                  </div>
+
+                  <Link href="/chat" className="block pt-2">
+                    <Button className="w-full text-lg py-7 rounded-xl bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 border-0 hover:scale-[1.02]">
+                      התחילו לשאול שאלות
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* WhatsApp Section */}
+        <div className="text-center mb-20">
+          <p className="text-lg text-slate-600 mb-4">עוד לא בקבוצה?</p>
+          <Link
+            href="https://docs.google.com/forms/d/e/1FAIpQLSfBZS2QAt6jeDXFKRP2vik0Nl3iav9Em9B_nO7YEZswI-ZqpA/viewform"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block"
+          >
+            <Button
+              size="lg"
+              className="text-lg sm:text-xl px-6 py-6 sm:px-10 sm:py-8 rounded-2xl hover:scale-105 transition-all duration-300 bg-gradient-to-r from-[#25D366] to-[#128C7E] hover:from-[#128C7E] hover:to-[#075E54] shadow-lg hover:shadow-xl flex items-center gap-2 sm:gap-3 border-0"
+            >
+              <BsWhatsapp className="h-5 w-5 sm:h-7 sm:w-7" />
+              הצטרף לקבוצת ה WhatsApp
+            </Button>
+          </Link>
         </div>
 
         {/* Useful Links Section */}
