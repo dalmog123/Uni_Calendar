@@ -4,6 +4,7 @@
 
 body {
   font-family: Arial, Helvetica, sans-serif;
+  cursor: url('/cursor.png'), auto;
 }
 
 @layer base {
