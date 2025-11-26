@@ -12,13 +12,13 @@ import { CalculatorIcon, DollarSign, BookOpen, GraduationCap, ExternalLink, Chec
 import { syllabusData } from '../syllabus/data'
 
 const COSTS = {
-  coursePrice: 1792,
-  extraGuidance: 349,
-  summerSemester: 334,
+  coursePrice: 1801,
+  extraGuidance: 351,
+  summerSemester: 336,
   security: 52,
   additionalCoursesCount: 5,
   englishCourse: 2422,
-  accountingExemption: 2422,
+  accountingExemption: 2433,
   registration: 877,
   studentOrg: 10,
 }

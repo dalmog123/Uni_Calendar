@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState } from "react"
 import { DragDropContext, Droppable, Draggable, type DropResult } from "react-beautiful-dnd"
-import { ChevronDown, ChevronUp, ExternalLink, GripVertical, BookOpen, Calendar, Award } from "lucide-react"
+import { ChevronDown, ChevronUp, ExternalLink, GripVertical, BookOpen, Calendar, Award, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { type Course, type Year, syllabusPlans } from "./data"
@@ -43,13 +43,13 @@ const SyllabusSelector: React.FC<{ selectedPlan: string; onPlanChange: (value: s
             </button>
           ))}
 
-          <button
+          {/* <button
             disabled
             className="p-4 rounded-xl text-right opacity-50 cursor-not-allowed bg-slate-50 text-slate-400 border border-slate-200"
           >
             <div className="font-medium text-sm">מותאם אישית</div>
             <div className="text-xs mt-1">(בקרוב)</div>
-          </button>
+          </button> */}
         </div>
 
         <div className="flex justify-center">
@@ -79,27 +79,29 @@ const CourseCard: React.FC<{ course: Course; isDragging: boolean }> = ({ course,
     <Card
       className={`w-full mb-3 transition-all duration-300 ${
         isDragging
-          ? "shadow-2xl shadow-blue-500/20 bg-white scale-105"
+          ? "shadow-2xl shadow-blue-500/20 bg-white scale-105 rotate-1"
           : "bg-white/90 backdrop-blur-sm hover:bg-white hover:shadow-lg border-slate-200"
       }`}
     >
       <CardHeader className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <GripVertical className="h-4 w-4 text-slate-400" />
+            <div className="cursor-grab active:cursor-grabbing p-1 hover:bg-slate-100 rounded-md text-slate-400">
+              <GripVertical className="h-4 w-4" />
+            </div>
             <span className="text-sm font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-md">
               {course.courseNumber}
             </span>
           </div>
-          <Button variant="ghost" size="sm" onClick={() => setIsExpanded(!isExpanded)} className="hover:bg-slate-100">
+          <Button variant="ghost" size="sm" onClick={() => setIsExpanded(!isExpanded)} className="hover:bg-slate-100 h-8 w-8 p-0 rounded-full">
             {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </Button>
         </div>
-        <CardTitle className="text-base text-slate-800 leading-relaxed">{course.name}</CardTitle>
+        <CardTitle className="text-base text-slate-800 leading-relaxed mt-2">{course.name}</CardTitle>
       </CardHeader>
       {isExpanded && (
         <CardContent className="px-4 pb-4 pt-0">
-          <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-2 gap-4 text-sm pt-2 border-t border-slate-100">
             <div className="flex items-center gap-2">
               <Award className="h-4 w-4 text-blue-500" />
               <span className="text-slate-600">{course.credits} נ"ז</span>
@@ -110,7 +112,7 @@ const CourseCard: React.FC<{ course: Course; isDragging: boolean }> = ({ course,
             </div>
           </div>
           <div className="mt-3 text-sm text-slate-600">
-            <span className="font-medium">סמסטר:</span> {course.semester}
+            <span className="font-medium">סמסטר מומלץ:</span> {course.semester}
           </div>
         </CardContent>
       )}
@@ -147,7 +149,7 @@ const SemesterColumn: React.FC<{ semesterName: string; courses: Course[]; yearId
         <div
           {...provided.droppableProps}
           ref={provided.innerRef}
-          className={`rounded-xl p-4 transition-all duration-300 ${
+          className={`rounded-xl p-4 transition-all duration-300 h-full flex flex-col ${
             snapshot.isDraggingOver
               ? "bg-blue-50 border-2 border-blue-300 border-dashed"
               : "bg-slate-50 border border-slate-200"
@@ -155,15 +157,15 @@ const SemesterColumn: React.FC<{ semesterName: string; courses: Course[]; yearId
         >
           <div className="flex items-center gap-3 mb-4">
             <div
-              className={`w-8 h-8 rounded-lg bg-gradient-to-br ${getSemesterGradient(semesterName)} flex items-center justify-center`}
+              className={`w-8 h-8 rounded-lg bg-gradient-to-br ${getSemesterGradient(semesterName)} flex items-center justify-center text-white shadow-sm`}
             >
-              <Calendar className="h-4 w-4 text-white" />
+              <Calendar className="h-4 w-4" />
             </div>
             <h4 className="font-semibold text-slate-800">{semesterName}</h4>
-            <span className="text-xs text-slate-500 bg-slate-200 px-2 py-1 rounded-full">{courses.length} קורסים</span>
+            <span className="text-xs text-slate-500 bg-slate-200 px-2 py-1 rounded-full mr-auto">{courses.length} קורסים</span>
           </div>
 
-          <div className="space-y-2">
+          <div className="flex-1 space-y-2 min-h-[100px]">
             {courses.map((course, index) => (
               <Draggable key={course.id} draggableId={course.id} index={index}>
                 {(provided, snapshot) => (
@@ -173,8 +175,8 @@ const SemesterColumn: React.FC<{ semesterName: string; courses: Course[]; yearId
                 )}
               </Draggable>
             ))}
+            {provided.placeholder}
           </div>
-          {provided.placeholder}
         </div>
       )}
     </Droppable>
@@ -182,23 +184,20 @@ const SemesterColumn: React.FC<{ semesterName: string; courses: Course[]; yearId
 }
 
 const YearCard: React.FC<{ year: Year }> = ({ year }) => (
-  <Card className="mb-8 bg-white/80 backdrop-blur-sm border-slate-200 shadow-xl">
-    <CardHeader className="pb-4">
-      <CardTitle className="text-2xl text-slate-800 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
-          <span className="text-white font-bold text-sm">{year.id}</span>
-        </div>
+  <div className="mb-8">
+    <div className="flex items-center gap-4 mb-6">
+      <div className="h-px flex-1 bg-slate-200" />
+      <h3 className="text-xl font-bold text-slate-800 px-6 py-2 bg-white rounded-full border border-slate-200 shadow-sm">
         {year.name}
-      </CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {Object.entries(year.semesters).map(([semesterName, courses]) => (
-          <SemesterColumn key={semesterName} semesterName={semesterName} courses={courses} yearId={year.id} />
-        ))}
-      </div>
-    </CardContent>
-  </Card>
+      </h3>
+      <div className="h-px flex-1 bg-slate-200" />
+    </div>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {Object.entries(year.semesters).map(([semesterName, courses]) => (
+        <SemesterColumn key={semesterName} semesterName={semesterName} courses={courses} yearId={year.id} />
+      ))}
+    </div>
+  </div>
 )
 
 export default function Syllabus() {
@@ -230,7 +229,13 @@ export default function Syllabus() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100" dir="rtl">
-      <div className="container mx-auto px-4 py-12 max-w-7xl">
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[10%] right-[5%] w-[600px] h-[600px] rounded-full bg-indigo-100/40 blur-3xl" />
+        <div className="absolute bottom-[20%] left-[10%] w-[500px] h-[500px] rounded-full bg-blue-100/40 blur-3xl" />
+        <div className="absolute inset-0 bg-grid-pattern opacity-[0.3]" />
+      </div>
+
+      <div className="relative z-10 container mx-auto px-4 py-12 max-w-7xl">
         {/* Hero Section */}
         <div className="text-center space-y-6 mb-12">
           <div className="space-y-4">
@@ -251,7 +256,7 @@ export default function Syllabus() {
         </DragDropContext>
 
         {/* Seminar Information */}
-        <Card className="mt-8 bg-white/80 backdrop-blur-sm border-slate-200 shadow-xl">
+        <Card className="mt-12 bg-white/80 backdrop-blur-sm border-slate-200 shadow-xl">
           <CardHeader className="pb-4">
             <CardTitle className="text-2xl text-slate-800 flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
@@ -262,7 +267,7 @@ export default function Syllabus() {
           </CardHeader>
           <CardContent className="space-y-6">
             <p className="text-lg leading-relaxed text-slate-700">
-              במסגרת התכנית יש לכתוב עבודה סמינריונית אחת בחשבונאות. כתיבת העבודה הסמינריונית והגשתה הי במסגרת סמינריון
+              במסגרת התכנית יש לכתוב עבודה סמינריונית אחת בחשבונאות. כתיבת העבודה הסמינריונית והגשתה היא במסגרת סמינריון
               באחד משלושת הקורסים:
             </p>
 
@@ -288,44 +293,56 @@ export default function Syllabus() {
                   extra: true,
                 },
               ].map((item, index) => (
-                <div key={index} className="flex gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
-                  <div
-                    className={`w-8 h-8 rounded-lg bg-gradient-to-br ${item.gradient} flex items-center justify-center flex-shrink-0 mt-1`}
-                  >
-                    <span className="text-white font-bold text-sm">{index + 1}</span>
-                  </div>
-                  <div className="space-y-2">
-                    <div>
-                      <span className="font-semibold text-slate-800">{item.course}</span>
-                      <span className="text-slate-500 mr-2">({item.number})</span>
+                <div key={index} className="flex flex-col md:flex-row gap-4 p-5 rounded-xl bg-slate-50 border border-slate-200 shadow-sm hover:shadow-md transition-all">
+                  <div className="flex items-start gap-4">
+                    <div
+                      className={`w-8 h-8 rounded-lg bg-gradient-to-br ${item.gradient} flex items-center justify-center flex-shrink-0 mt-1 text-white font-bold text-sm`}
+                    >
+                      {index + 1}
                     </div>
-                    <div className="text-slate-600">{item.seminar}</div>
-                    {item.extra && (
-                      <div className="text-slate-600">
-                        <span className="text-blue-600 font-medium">או</span> סמינריון נושאים במסים, בחשבונאות פיננסית
-                        ודיווח כספי
-                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded mx-2 text-sm">(אנגלית)</span>
-                        (91635)
-                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded mx-2 text-sm">
-                          קורס תוכן EMI
-                        </span>
-                        <div className="text-sm text-slate-500 mt-1">* מיועד לסטודנטים שהגיעו לרמת פטור באנגלית</div>
+                    <div className="space-y-2">
+                      <div>
+                        <span className="font-semibold text-slate-800 text-lg">{item.course}</span>
+                        <span className="text-slate-500 mr-2 bg-slate-200 px-2 py-0.5 rounded text-sm">({item.number})</span>
                       </div>
-                    )}
+                      <div className="text-slate-700 font-medium bg-white/50 p-2 rounded-lg border border-slate-100 inline-block">
+                        {item.seminar}
+                      </div>
+                      {item.extra && (
+                        <div className="mt-3 pt-3 border-t border-slate-200 text-slate-600">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-blue-600 font-bold">או</span>
+                            <span>סמינריון נושאים במסים, בחשבונאות פיננסית ודיווח כספי</span>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2 mt-1">
+                            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-bold">אנגלית (91635)</span>
+                            <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold">קורס תוכן EMI</span>
+                          </div>
+                          <div className="text-sm text-slate-500 mt-2 flex items-center gap-1">
+                            * מיועד לסטודנטים שהגיעו לרמת פטור באנגלית
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 p-6 rounded-xl">
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">⚠️</span>
-                  <span className="font-semibold text-amber-800">ההרשמה לסמינריון מותנת בסיום הקורס בהצלחה.</span>
+            <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 p-6 rounded-xl shadow-inner">
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl mt-[-2px]">⚠️</span>
+                  <span className="font-semibold text-amber-900">
+                    ההרשמה לסמינריון מותנת בסיום הקורס בהצלחה.
+                  </span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">⚠️</span>
-                  <span className="font-semibold text-amber-800">ההשתתפות בכל מפגשי הסמינריון במלואם הינה חובה.</span>
+                <div className="w-full h-px bg-amber-200/50" />
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl mt-[-2px]">⚠️</span>
+                  <span className="font-semibold text-amber-900">
+                    ההשתתפות בכל מפגשי הסמינריון במלואם הינה חובה.
+                  </span>
                 </div>
               </div>
             </div>

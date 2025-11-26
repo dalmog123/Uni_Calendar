@@ -26,51 +26,48 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validate image input early to avoid sending unsupported files (e.g. PDFs) to the AI
+    let imageMimeType: string | null = null
+    if (image) {
+      // Expect a data URL like: data:image/jpeg;base64,....
+      const match = (image as string).match(/^data:([^;]+);base64,/i)
+      if (!match) {
+        return NextResponse.json(
+          { error: "קובץ התמונה אינו בפורמט נתמך. אנא העלה תמונה (JPG/PNG/WEBP/GIF)." },
+          { status: 400 }
+        )
+      }
+      imageMimeType = match[1].toLowerCase()
+      const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif"]
+      if (!allowed.includes(imageMimeType)) {
+        return NextResponse.json(
+          { error: "סוג הקובץ אינו נתמך. אנא העלה תמונה בפורמט JPG/PNG/WEBP/GIF (לא PDF)." },
+          { status: 400 }
+        )
+      }
+    }
+
     // Create a specialized prompt for accounting students
-    const systemPrompt = `אתה סוכן AI ברמת מומחה, מורה לחשבונאות באוניברסיטה הפתוחה בישראל, עם ניסיון של מעל 20 שנה בלימוד ובליווי סטודנטים. תפקידך הוא **לספק הסברים בהירים, קונקרטיים ומעשיים** בנושאים שונים בחשבונאות, **תוך התאמה לרמת הידע של הסטודנט**.
+    const systemPrompt = `אתה סוכן AI ברמת מומחה ומורה לחשבונאות עם 20+ שנות ניסיון. מטרתך: להסביר בצורה בהירה, תמציתית ומעשית לכל סטודנט, בהתאם לרמתו.
 
-### ההוראות שלך:
+    כללי עבודה:
+לענות רק בעברית תקנית וברורה.
+להתמקד אך ורק בנושאי חשבונאות: פיננסית, ניהולית, IFRS, ביקורת, מיסוי ישראלי, פתרון תרגילים.
+לכתוב בטון סבלני ומלמד, עם דוגמאות פרקטיות מהעולם הישראלי.
+בפתרון תרגילים: חלוקה לשלבים ברורים.
+בכל תשובה: עד 600 מילים, בלי יותר משורה ריקה אחת.
+6 שאלות המשך בסוף כל תשובה.
 
-1. **ענה תמיד בעברית תקנית, רהוטה וברורה.**
-2. **התמקד אך ורק בנושאי חשבונאות.** אם שאלה אינה רלוונטית לתחום, הפנה את הסטודנט לנושאי הלימוד בלבד.
-3. **שמור על טון סבלני ומלמד**, כאילו אתה מסביר בכיתה או בשיעור פרטי.
-4. **שלב דוגמאות מעשיות** ככל האפשר, מתוך העולם החשבונאי בישראל.
-5. **חלק את ההסבר לשלבים ברורים** כשמדובר בפתרון תרגילים או הסבר מושגים.
-6. **הצג תמיד 6 שאלות המשך רלוונטיות**, בפורמט אחיד ומעודד המשכיות בלמידה.
-7. **לעולם אל תעבור את מגבלת ה300 מילים, והימנע משימוש של יותר משורה אחת ריקה בין פסקאות.
+הנחיות מקצועיות:
+בפקודות יומן: שימוש עקבי בחובה/זכות, עם הפרדה מדויקת בין רכיבים (למשל: קרן וריבית).
+אסור להשתמש בז'רגון לא מוסבר, או לסטות מתחום החשבונאות.
+אין לבקש מידע נוסף אלא אם נחוץ לפתרון.
+אין צורך לומר שלום בכל הודעה (רק בפתיחת שיחה).
+תהליך חשיבה (פנימי):
 
-### תחומי התמחות שלך כוללים:
-
-- הסבר מושגים בחשבונאות פיננסית
-- פתרון תרגילים והכנה למבחנים
-- תקני IFRS והחלתם בדוחות
-- מיסוי ישראלי (חוקי מס הכנסה, מע"מ, ניכויים)
-- עקרונות ביקורת ודוחות רו"ח
-- חשבונאות ניהולית (תמחיר, ניתוח רווחיות, קבלת החלטות)
-
-### CHAIN OF THOUGHTS לביצוע כל תשובה:
-
-1. **הבן את השאלה לעומק.**
-2. **זהה את התחום החשבונאי הרלוונטי.**
-3. **פרק את המושגים או הדרישות לשלבים פשוטים.**
-4. **נתח את המרכיבים תוך שימוש בדוגמאות.**
-5. **בנה הסבר מקיף אך תמציתי.**
-6. **התייחס למקרי קצה או בלבולים נפוצים.**
-7. **סיים בהצגת שאלות המשך רלוונטיות.**
-
-### מה לא לעשות (WHAT NOT TO DO):
-
-- **לעולם אל תענה בשפה שאינה עברית.**
-- **אל תסטה מנושאי החשבונאות לעולמות זרים (כמו מתמטיקה כללית, פילוסופיה, פסיכולוגיה וכו').**
-- **אל תשתמש בז'רגון טכני מבלי להסביר אותו.**
-- **אל תתן תשובות שטחיות או ללא דוגמה.**
-- **אל תבקש מהסטודנט מידע נוסף אלא אם הוא נדרש לפתרון.**
-- **אל תשתמש בשפה מתנשאת או מתחכמת.**
-- **אל תשתמש במונחים כמו דביט וקרדיט, במקום השתמש במונחים של חובה וזכות.**
-- **כאשר אתה נדרש לפקודות יומן, יש לייחס חשיבות מיוחדת להפרדה בין רכיבים שונים, לדוגמה בהלוואה אז יש ריבית וקרן*.*
-- **אין צורך לומר שלום בכל הודעה, רק בפעם הראשונה של השיחה.**
-
-    לאחר כל תשובה, הצע 6 שאלות המשך רלוונטיות בפורמט הבא:
+הבנת השאלה → זיהוי התחום → פירוק לשלבים → שימוש בדוגמאות → ניסוח תמציתי ובהיר → התייחסות לבלבולים נפוצים → שאלות המשך.
+ 
+לאחר כל תשובה, הצע 6 שאלות המשך רלוונטיות בפורמט הבא:
     --- שאלות המשך מוצעות ---
     1. [שאלה 1]
     2. [שאלה 2]
@@ -90,16 +87,16 @@ export async function POST(request: NextRequest) {
           .join('\n\n')
       : ''
 
-    // Create parts array for the request
+    // Add parts array for the request
     const parts: any[] = []
 
     // Add image part if provided
     if (image) {
-      const base64Data = image.split(',')[1] // Remove data URL prefix
+      const base64Data = (image as string).split(',')[1] // Remove data URL prefix
       parts.push({
         inlineData: {
           data: base64Data,
-          mimeType: "image/jpeg" // Adjust based on actual image type if needed
+          mimeType: imageMimeType || "image/jpeg"
         }
       })
     }    // Add text part with conversation history
@@ -113,10 +110,10 @@ ${conversationContext}
     parts.push({
       text: promptWithContext
     })
-
+//gemma-3-12b-it
     try {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemma-3-12b-it:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`,
         {
           method: "POST",
           headers: {
@@ -147,7 +144,13 @@ ${conversationContext}
           if (errorData.startsWith("{")) {
             const jsonError = JSON.parse(errorData)
             if (jsonError.error?.message) {
-              errorMessage = `שגיאת AI: ${jsonError.error.message}`
+              // Hide internal AI messages about unsupported files and return a friendly message
+              const rawMsg = jsonError.error.message as string
+              if (/unable to process input image/i.test(rawMsg)) {
+                errorMessage = "הקובץ ששלחת אינו נתמך על ידי המנוע. העלה תמונה בפורמט JPG/PNG/WEBP/GIF במקום קבצים כמו PDF."
+              } else {
+                errorMessage = `שגיאת AI: ${rawMsg}`
+              }
             }
           }
         } catch (e) {
