@@ -3,7 +3,7 @@
 import { Button } from "./button"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { CalendarDays, BookOpen, Library, Calculator, Menu, Home, TimerIcon, X, Cpu } from "lucide-react"
+import { CalendarDays, BookOpen, Library, Calculator, Menu, Home, TimerIcon, X, Cpu, Scale } from "lucide-react"
 import { useState, useEffect } from "react"
 
 export function Header() {
@@ -24,6 +24,7 @@ export function Header() {
     { href: "/calendar", icon: CalendarDays, label: "לוח שנה" },
     { href: "/syllabus", icon: BookOpen, label: "סילבוס" },
     { href: "/materials", icon: Library, label: "חומרים" },
+    { href: "/pkuda", icon: Scale, label: "פקודה" },
     { href: "/calculator", icon: Calculator, label: "מחשבון" },
     { href: "/timer", icon: TimerIcon, label: "טיימר", isNew: true },
     { href: "/chat", icon: Cpu, label: "AI Tutor", isSpecial: true },
