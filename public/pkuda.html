@@ -199,6 +199,60 @@
             background-color: #34495e;
             transform: scale(1.1);
         }
+
+        /* Context Menu */
+        #ai-context-menu {
+            position: fixed;
+            background-color: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            padding: 4px;
+            z-index: 10000;
+            display: none;
+            min-width: 180px;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            direction: rtl;
+        }
+
+        #ai-context-menu button {
+            width: 100%;
+            padding: 10px 16px;
+            text-align: right;
+            direction: rtl;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #374151;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            flex-direction: row;
+            gap: 8px;
+            transition: background-color 0.2s;
+        }
+
+        #ai-context-menu button:hover {
+            background-color: #f3f4f6;
+        }
+
+        #ai-context-menu button:active {
+            background-color: #e5e7eb;
+        }
+
+        #ai-context-menu button svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+            color: #10b981;
+        }
+
+        /* Visual feedback for click and hold */
+        .main-content div.holding {
+            background-color: #dbeafe !important;
+            transition: background-color 0.2s ease;
+        }
     </style>
 </head>
 <body>
@@ -214,6 +268,44 @@
 <button id="back-to-toc" onclick="window.scrollTo(0,0)" title="חזרה לתוכן עניינים">
     ↑
 </button>
+
+<!-- AI Context Menu -->
+<div id="ai-context-menu">
+    <button onclick="analyzeWithAI('explain')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <path d="M12 17h.01"></path>
+        </svg>
+        הסבר מפורט של הסעיף
+    </button>
+    <button onclick="analyzeWithAI('examples')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="9" y1="3" x2="9" y2="21"></line>
+            <line x1="3" y1="9" x2="21" y2="9"></line>
+        </svg>
+        דוגמאות מעשיות ויישום
+    </button>
+    <button onclick="analyzeWithAI('conditions')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 11 12 14 22 4"></polyline>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+        </svg>
+        תנאים וקריטריונים למימוש
+    </button>
+    <button onclick="analyzeWithAI('rulings')">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        פסקי דין מפורסמים ופרשנות משפטית
+    </button>
+</div>
+
 
 <div id="toc-container">
     <h2 id="toc-top">תוכן עניינים</h2>
@@ -19260,6 +19352,545 @@
             }, 2000);
         }
     }
+
+    // Right-click and click-and-hold for AI analysis menu
+    let clickHoldTimer = null;
+    let currentFieldElement = null;
+    let currentFieldElements = []; // Array to store all elements in the major section
+    let currentFieldText = '';
+    let isClickHoldActive = false; // Track if menu was opened via click-and-hold
+    const CLICK_HOLD_DURATION = 500; // 500ms for click and hold
+    const contextMenu = document.getElementById('ai-context-menu');
+
+    function getFieldText(element) {
+        // Find the parent div that contains the field content
+        let fieldElement = element;
+        
+        // If clicked on a paragraph, get its parent div
+        if (element.tagName === 'P' || element.tagName === 'p') {
+            fieldElement = element.parentElement;
+        }
+        
+        // If clicked on h6, get the next sibling div
+        if (element.tagName === 'H6' || element.tagName === 'h6') {
+            fieldElement = element.nextElementSibling;
+        }
+        
+        // If we're in a div with id, use it; otherwise find the closest div with content
+        while (fieldElement && fieldElement.tagName !== 'DIV' && fieldElement.tagName !== 'div') {
+            fieldElement = fieldElement.parentElement;
+        }
+        
+        if (!fieldElement) {
+            return { element: null, text: '' };
+        }
+        
+        // First, try to find the section number in the clicked element itself
+        const clickedText = (fieldElement.textContent || '').trim();
+        let clickedSectionNumber = null;
+        let clickedSectionStart = null;
+        
+        // Check if the clicked element contains a section number (e.g., "29(1)" or "29. (א)")
+        const clickedSectionMatch = clickedText.match(/^(\d+[א-ת]*)\s*[\.\(]/);
+        if (clickedSectionMatch) {
+            clickedSectionNumber = clickedSectionMatch[1];
+            clickedSectionStart = fieldElement;
+        }
+        
+        // Find the major section header (e.g., "121. (א)" or "121ב. (א)" or "29(1)")
+        // Pattern: number(s) followed by optional Hebrew letter(s), period or parenthesis
+        let currentElement = fieldElement;
+        let majorSectionStart = null;
+        let majorSectionNumber = null;
+        
+        // Walk backwards to find the major section start
+        while (currentElement) {
+            const text = (currentElement.textContent || '').trim();
+            // Check if this is a major section header
+            // Pattern 1: "121. (א)" or "121ב. (א)" - with period before parenthesis
+            // Pattern 2: "29(1)" or "29(א)" - without period before parenthesis
+            const majorSectionMatch = text.match(/^(\d+[א-ת]*)\s*[\.\(]/);
+            if (majorSectionMatch) {
+                const sectionNum = majorSectionMatch[1];
+                // If we found the clicked section, use it
+                if (clickedSectionNumber && sectionNum === clickedSectionNumber) {
+                    majorSectionStart = currentElement;
+                    majorSectionNumber = sectionNum;
+                    break;
+                }
+                // Otherwise, check if this matches the pattern with period and parenthesis
+                const periodMatch = text.match(/^(\d+[א-ת]*)\s*\.\s*\([א-ת]\)/);
+                if (periodMatch) {
+                    majorSectionStart = currentElement;
+                    majorSectionNumber = periodMatch[1];
+                    // If we already found the clicked section, prefer it
+                    if (!clickedSectionNumber || clickedSectionNumber === periodMatch[1]) {
+                        break;
+                    }
+                }
+            }
+            // Move to previous sibling div
+            let prevSibling = currentElement.previousElementSibling;
+            // Skip empty h6 elements
+            while (prevSibling && (prevSibling.tagName === 'H6' || prevSibling.tagName === 'h6')) {
+                prevSibling = prevSibling.previousElementSibling;
+            }
+            if (prevSibling && prevSibling.tagName === 'DIV') {
+                currentElement = prevSibling;
+            } else {
+                // If we hit an h2 or h6 with content, we've gone too far
+                if (prevSibling && (prevSibling.tagName === 'H2' || prevSibling.tagName === 'h2')) {
+                    break;
+                }
+                // Try going up to parent and then to previous sibling
+                const parent = currentElement.parentElement;
+                if (parent) {
+                    prevSibling = parent.previousElementSibling;
+                    while (prevSibling && (prevSibling.tagName === 'H6' || prevSibling.tagName === 'h6')) {
+                        prevSibling = prevSibling.previousElementSibling;
+                    }
+                    if (prevSibling && prevSibling.tagName === 'DIV') {
+                        currentElement = prevSibling;
+                    } else {
+                        break;
+                    }
+                } else {
+                    break;
+                }
+            }
+        }
+        
+        // If we found a major section, collect all content until the next major section
+        if (majorSectionStart && majorSectionNumber) {
+            const sections = [];
+            const allElements = [];
+            let currentSection = majorSectionStart;
+            
+            // Get h6 header before the major section if it exists
+            let prevH6 = majorSectionStart.previousElementSibling;
+            while (prevH6 && (prevH6.tagName === 'H6' || prevH6.tagName === 'h6')) {
+                const h6Text = (prevH6.textContent || '').trim();
+                if (h6Text) {
+                    sections.push(h6Text);
+                    allElements.push(prevH6);
+                    break;
+                }
+                prevH6 = prevH6.previousElementSibling;
+            }
+            
+            // Collect all content and elements from the major section
+            while (currentSection) {
+                const text = (currentSection.textContent || '').trim();
+                
+                // Check if this is the start of the next major section before adding it
+                // Pattern can be "121. (א)" or "121א." or "29(1)" etc.
+                const nextMajorSectionMatch = text.match(/^(\d+[א-ת]*)\s*[\.\(]/);
+                if (nextMajorSectionMatch) {
+                    const nextSectionNumber = nextMajorSectionMatch[1];
+                    // If it's a different section number (different base number or different letter suffix)
+                    if (nextSectionNumber !== majorSectionNumber) {
+                        // This is the start of a different major section, stop here
+                        break;
+                    }
+                }
+                
+                if (text) {
+                    sections.push(text);
+                }
+                allElements.push(currentSection);
+                
+                // Move to next sibling div
+                let nextSibling = currentSection.nextElementSibling;
+                // Check h6 elements - if they have content, they might be section headers
+                while (nextSibling && (nextSibling.tagName === 'H6' || nextSibling.tagName === 'h6')) {
+                    const h6Text = (nextSibling.textContent || '').trim();
+                    // If h6 has content, it's likely a section header - stop before it
+                    if (h6Text) {
+                        // Don't add this h6, stop here
+                        break;
+                    }
+                    // Empty h6, skip it
+                    nextSibling = nextSibling.nextElementSibling;
+                }
+                
+                // Stop if we hit an h2 (new part)
+                if (nextSibling && nextSibling.tagName === 'H2') {
+                    break;
+                }
+                
+                // Move to next div
+                if (nextSibling && nextSibling.tagName === 'DIV') {
+                    currentSection = nextSibling;
+                } else {
+                    break;
+                }
+            }
+            
+            const fullText = sections.join('\n\n');
+            return { element: majorSectionStart, elements: allElements, text: fullText };
+        }
+        
+        // Fallback: collect the clicked element and its siblings until next section
+        const sections = [];
+        const allElements = [];
+        let currentSection = fieldElement;
+        
+        // Get h6 header before if it exists
+        let prevH6 = fieldElement.previousElementSibling;
+        if (prevH6 && (prevH6.tagName === 'H6' || prevH6.tagName === 'h6')) {
+            const h6Text = (prevH6.textContent || '').trim();
+            if (h6Text) {
+                sections.push(h6Text);
+                allElements.push(prevH6);
+            }
+        }
+        
+        // Collect current element and following siblings until next section
+        while (currentSection) {
+            const text = (currentSection.textContent || '').trim();
+            
+            // Stop if we hit a new section number
+            const sectionMatch = text.match(/^(\d+[א-ת]*)\s*[\.\(]/);
+            if (sectionMatch && currentSection !== fieldElement) {
+                // This is a different section, stop before it
+                break;
+            }
+            
+            if (text) {
+                sections.push(text);
+            }
+            allElements.push(currentSection);
+            
+            // Move to next sibling div
+            let nextSibling = currentSection.nextElementSibling;
+            // Skip empty h6 elements
+            while (nextSibling && (nextSibling.tagName === 'H6' || nextSibling.tagName === 'h6')) {
+                const h6Text = (nextSibling.textContent || '').trim();
+                if (h6Text) {
+                    // h6 with content might be a section header, stop before it
+                    break;
+                }
+                nextSibling = nextSibling.nextElementSibling;
+            }
+            
+            // Stop if we hit an h2 (new part)
+            if (nextSibling && nextSibling.tagName === 'H2') {
+                break;
+            }
+            
+            // Move to next div
+            if (nextSibling && nextSibling.tagName === 'DIV') {
+                currentSection = nextSibling;
+            } else {
+                break;
+            }
+        }
+        
+        const fullText = sections.join('\n\n');
+        return { element: fieldElement, elements: allElements, text: fullText };
+    }
+
+    function showContextMenu(x, y, fieldData, fromClickHold) {
+        if (!fieldData.text || fieldData.text.length < 10) {
+            return;
+        }
+        
+        currentFieldElement = fieldData.element;
+        currentFieldElements = fieldData.elements || [fieldData.element];
+        currentFieldText = fieldData.text;
+        isClickHoldActive = fromClickHold || false;
+        
+        contextMenu.style.display = 'block';
+        contextMenu.style.left = x + 'px';
+        contextMenu.style.top = y + 'px';
+        
+        // Adjust position if menu goes off screen
+        setTimeout(function() {
+            const rect = contextMenu.getBoundingClientRect();
+            if (rect.right > window.innerWidth) {
+                contextMenu.style.left = (x - rect.width) + 'px';
+            }
+            if (rect.bottom > window.innerHeight) {
+                contextMenu.style.top = (y - rect.height) + 'px';
+            }
+        }, 0);
+    }
+
+    function hideContextMenu() {
+        contextMenu.style.display = 'none';
+        currentFieldElement = null;
+        currentFieldElements = [];
+        currentFieldText = '';
+        isClickHoldActive = false;
+        
+        // Remove holding class from all elements
+        const holdingElements = document.querySelectorAll('.main-content div.holding');
+        holdingElements.forEach(function(el) {
+            el.classList.remove('holding');
+        });
+    }
+
+    function analyzeWithAI(actionType) {
+        if (currentFieldText && currentFieldText.length > 10) {
+            // Visual feedback - highlight all elements in the major section
+            if (currentFieldElements && currentFieldElements.length > 0) {
+                currentFieldElements.forEach(function(el) {
+                    if (el && el.style) {
+                        el.style.backgroundColor = '#dcfce7';
+                    }
+                });
+                setTimeout(function() {
+                    if (currentFieldElements && currentFieldElements.length > 0) {
+                        currentFieldElements.forEach(function(el) {
+                            if (el && el.style) {
+                                el.style.backgroundColor = '';
+                            }
+                        });
+                    }
+                }, 1000);
+            }
+            
+            // Send message to parent window with action type
+            if (window.parent) {
+                window.parent.postMessage({
+                    type: 'pkuda-analyze-text',
+                    text: currentFieldText,
+                    actionType: actionType || 'explain'
+                }, '*'); // In production, use specific origin
+            }
+            
+            hideContextMenu();
+        }
+    }
+
+    // Right-click handler
+    document.addEventListener('contextmenu', function(e) {
+        const target = e.target;
+        
+        // Only show menu if clicking on content areas (not nav bar, buttons, etc.)
+        if (target && (target.closest('.main-content') || target.closest('#toc-container'))) {
+            e.preventDefault(); // Prevent default context menu
+            
+            const fieldData = getFieldText(target);
+            if (fieldData.text && fieldData.text.length > 10) {
+                showContextMenu(e.clientX, e.clientY, fieldData, false);
+                menuJustOpened = false; // Right-click doesn't need protection
+                lastMenuOpenTime = Date.now();
+            }
+        } else {
+            hideContextMenu();
+        }
+    });
+
+    // Click and hold handler
+    document.addEventListener('mousedown', function(e) {
+        const target = e.target;
+        
+        // Only for left click and content areas
+        // Don't start if clicking on the context menu
+        if (e.button === 0 && target && 
+            !contextMenu.contains(target) &&
+            (target.closest('.main-content') || target.closest('#toc-container'))) {
+            const fieldData = getFieldText(target);
+            
+            if (fieldData.element && fieldData.text && fieldData.text.length > 10) {
+                // Add holding class to all elements in the major section
+                if (fieldData.elements && fieldData.elements.length > 0) {
+                    fieldData.elements.forEach(function(el) {
+                        el.classList.add('holding');
+                    });
+                } else {
+                    fieldData.element.classList.add('holding');
+                }
+                
+                clickHoldTimer = window.setTimeout(function() {
+                    if (fieldData.elements && fieldData.elements.length > 0) {
+                        fieldData.elements.forEach(function(el) {
+                            el.classList.remove('holding');
+                        });
+                    } else if (fieldData.element) {
+                        fieldData.element.classList.remove('holding');
+                    }
+                    showContextMenu(e.clientX, e.clientY, fieldData, true);
+                    menuJustOpened = true;
+                    lastMenuOpenTime = Date.now();
+                    clickHoldTimer = null;
+                }, CLICK_HOLD_DURATION);
+            }
+        }
+    });
+
+    document.addEventListener('mouseup', function(e) {
+        // Clear the timer if mouse is released before hold duration
+        if (clickHoldTimer !== null) {
+            clearTimeout(clickHoldTimer);
+            clickHoldTimer = null;
+            
+            // Remove holding class
+            const holdingElements = document.querySelectorAll('.main-content div.holding');
+            holdingElements.forEach(function(el) {
+                el.classList.remove('holding');
+            });
+        }
+        
+        // Don't hide menu on mouseup - let the click handler manage that
+        // This allows the menu to stay open after click-and-hold
+    });
+
+    document.addEventListener('mouseleave', function() {
+        if (clickHoldTimer !== null) {
+            clearTimeout(clickHoldTimer);
+            clickHoldTimer = null;
+            
+            // Remove holding class
+            const holdingElements = document.querySelectorAll('.main-content div.holding');
+            holdingElements.forEach(function(el) {
+                el.classList.remove('holding');
+            });
+        }
+    });
+
+    // Touch event handlers for mobile devices
+    let touchStartTime = null;
+    let touchStartElement = null;
+    let touchHoldTimer = null;
+    let touchStartPosition = null;
+    let touchStartEvent = null;
+
+    document.addEventListener('touchstart', function(e) {
+        const target = e.target;
+        const touch = e.touches[0];
+        
+        // Only for content areas, not the context menu
+        if (target && 
+            !contextMenu.contains(target) &&
+            (target.closest('.main-content') || target.closest('#toc-container'))) {
+            
+            const fieldData = getFieldText(target);
+            
+            if (fieldData.element && fieldData.text && fieldData.text.length > 10) {
+                touchStartTime = Date.now();
+                touchStartElement = fieldData.element;
+                touchStartPosition = { x: touch.clientX, y: touch.clientY };
+                touchStartEvent = e;
+                
+                // Add visual feedback
+                if (fieldData.elements && fieldData.elements.length > 0) {
+                    fieldData.elements.forEach(function(el) {
+                        el.classList.add('holding');
+                    });
+                } else {
+                    fieldData.element.classList.add('holding');
+                }
+                
+                // Store fieldData for use in timeout
+                const fieldDataForTimeout = fieldData;
+                const touchPosition = { x: touch.clientX, y: touch.clientY };
+                
+                touchHoldTimer = window.setTimeout(function() {
+                    if (fieldDataForTimeout.elements && fieldDataForTimeout.elements.length > 0) {
+                        fieldDataForTimeout.elements.forEach(function(el) {
+                            el.classList.remove('holding');
+                        });
+                    } else if (fieldDataForTimeout.element) {
+                        fieldDataForTimeout.element.classList.remove('holding');
+                    }
+                    showContextMenu(touchPosition.x, touchPosition.y, fieldDataForTimeout, true);
+                    menuJustOpened = true;
+                    lastMenuOpenTime = Date.now();
+                    touchHoldTimer = null;
+                    touchStartElement = null;
+                    touchStartPosition = null;
+                    touchStartEvent = null;
+                }, CLICK_HOLD_DURATION);
+            }
+        }
+    }, { passive: true });
+
+    document.addEventListener('touchend', function(e) {
+        // Clear the timer if touch ends before hold duration
+        if (touchHoldTimer !== null) {
+            clearTimeout(touchHoldTimer);
+            touchHoldTimer = null;
+        }
+        
+        // Remove holding class
+        if (touchStartElement) {
+            const holdingElements = document.querySelectorAll('.main-content div.holding');
+            holdingElements.forEach(function(el) {
+                el.classList.remove('holding');
+            });
+            touchStartElement = null;
+        }
+        
+        touchStartTime = null;
+        touchStartPosition = null;
+        touchStartEvent = null;
+    });
+
+    document.addEventListener('touchmove', function(e) {
+        // Cancel the hold if user moves finger
+        if (touchHoldTimer !== null) {
+            clearTimeout(touchHoldTimer);
+            touchHoldTimer = null;
+            
+            // Remove holding class
+            const holdingElements = document.querySelectorAll('.main-content div.holding');
+            holdingElements.forEach(function(el) {
+                el.classList.remove('holding');
+            });
+            touchStartElement = null;
+        }
+    });
+
+    document.addEventListener('touchcancel', function(e) {
+        // Clear everything on touch cancel
+        if (touchHoldTimer !== null) {
+            clearTimeout(touchHoldTimer);
+            touchHoldTimer = null;
+        }
+        
+        const holdingElements = document.querySelectorAll('.main-content div.holding');
+        holdingElements.forEach(function(el) {
+            el.classList.remove('holding');
+        });
+        
+        touchStartElement = null;
+        touchStartTime = null;
+        touchStartPosition = null;
+        touchStartEvent = null;
+    });
+
+    // Hide context menu when clicking outside (but not immediately after click-and-hold)
+    let menuJustOpened = false;
+    let lastMenuOpenTime = 0;
+    
+    document.addEventListener('click', function(e) {
+        const target = e.target;
+        
+        // If clicking on the analyze button or inside the menu, don't hide
+        if (target && (target.closest('#analyze-ai-btn') || contextMenu.contains(target))) {
+            menuJustOpened = false;
+            return;
+        }
+        
+        // If menu was just opened via click-and-hold (within last 500ms), ignore clicks outside
+        const timeSinceOpen = Date.now() - lastMenuOpenTime;
+        if (menuJustOpened && isClickHoldActive && timeSinceOpen < 500) {
+            // Allow clicking the button, but prevent closing from outside clicks
+            return;
+        }
+        
+        // Hide menu if clicking outside of it
+        if (contextMenu && contextMenu.style.display === 'block' && !contextMenu.contains(target)) {
+            hideContextMenu();
+        }
+    }, true); // Use capture phase to handle clicks properly
+
+    // Hide context menu on scroll
+    document.addEventListener('scroll', function() {
+        hideContextMenu();
+    });
 </script>
 
 </body>
