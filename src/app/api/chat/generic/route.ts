@@ -177,33 +177,42 @@ ${conversationContext}
 
     // Try primary model
     try {
+      const startTime = Date.now()
       console.log(`[PKUDA] Attempting request with primary model: ${primaryModel}`)
       const response = await makeModelRequest(primaryModel)
       const fullResponse = await processResponse(response)
+      console.log(`[PKUDA] Primary model succeeded in ${Date.now() - startTime}ms`)
       return NextResponse.json({ 
         response: fullResponse
       })
     } catch (error) {
       // Primary model failed, try fallback after delay
-      console.log(`[PKUDA] Primary model failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
-      console.log(`[PKUDA] Waiting ${retryDelayMs}ms before trying fallback: ${fallbackModel}`)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      console.log(`[PKUDA] Primary model failed: ${errorMessage}`)
+      console.log(`[PKUDA] Waiting ${retryDelayMs}ms (${retryDelayMs/1000}s) before trying fallback: ${fallbackModel}`)
+      
+      const delayStartTime = Date.now()
       await delay(retryDelayMs)
+      const actualDelay = Date.now() - delayStartTime
+      console.log(`[PKUDA] Delay completed. Actual delay: ${actualDelay}ms (expected: ${retryDelayMs}ms)`)
 
       try {
+        const fallbackStartTime = Date.now()
         console.log(`[PKUDA] Attempting request with fallback model: ${fallbackModel}`)
         const fallbackResponse = await makeModelRequest(fallbackModel)
         const fullResponse = await processResponse(fallbackResponse)
+        console.log(`[PKUDA] Fallback model succeeded in ${Date.now() - fallbackStartTime}ms`)
         return NextResponse.json({ 
           response: fullResponse
         })
       } catch (fallbackError) {
         // Fallback also failed, return error
-        console.error("[PKUDA] Fallback model also failed:", fallbackError)
-        const errorMessage = fallbackError instanceof Error 
+        const fallbackErrorMessage = fallbackError instanceof Error 
           ? fallbackError.message 
           : "שגיאה בתקשורת עם השרת"
+        console.error(`[PKUDA] Fallback model also failed: ${fallbackErrorMessage}`)
         return NextResponse.json(
-          { error: errorMessage },
+          { error: fallbackErrorMessage },
           { status: 500 }
         )
       }
