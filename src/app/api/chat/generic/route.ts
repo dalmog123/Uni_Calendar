@@ -91,9 +91,10 @@ ${conversationContext}
       text: promptWithContext
     })
 
-    try {
+    // Helper function to make API request to a specific model
+    const makeModelRequest = async (modelName: string) => {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
         {
           method: "POST",
           headers: {
@@ -114,7 +115,11 @@ ${conversationContext}
           }),
         }
       )
+      return response
+    }
 
+    // Helper function to process response and extract text
+    const processResponse = async (response: Response) => {
       if (!response.ok) {
         let errorMessage = "שגיאה בתקשורת עם מנוע ה-AI"
         try {
@@ -134,10 +139,7 @@ ${conversationContext}
         } catch (e) {
           console.error("Failed to parse error response:", e)
         }
-        return NextResponse.json(
-          { error: errorMessage },
-          { status: response.status }
-        )
+        throw new Error(errorMessage)
       }
 
       let data
@@ -147,39 +149,64 @@ ${conversationContext}
         data = JSON.parse(rawResponse)
       } catch (e) {
         console.error("Failed to parse Gemini response:", e)
-        return NextResponse.json(
-          { error: "התקבלה תשובה לא תקינה מהשרת" },
-          { status: 500 }
-        )
+        throw new Error("התקבלה תשובה לא תקינה מהשרת")
       }
 
       // Validate response structure
       if (!data?.candidates?.[0]?.content?.parts?.[0]) {
         console.error("Unexpected response structure:", data)
-        return NextResponse.json(
-          { error: "מבנה התשובה מה-AI אינו תקין" },
-          { status: 500 }
-        )
+        throw new Error("מבנה התשובה מה-AI אינו תקין")
       }
 
       const fullResponse = data.candidates[0].content.parts[0].text
 
       if (!fullResponse) {
+        throw new Error("לא התקבלה תשובה מהשרת")
+      }
+
+      return fullResponse.trim()
+    }
+
+    // Helper function to delay execution
+    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+
+    // Try primary model first, then fallback on any error
+    const primaryModel = "gemini-2.5-flash-lite"
+    const fallbackModel = "gemma-3-12b-it"
+    const retryDelayMs = 3000 // Wait 3 seconds before fallback
+
+    // Try primary model
+    try {
+      console.log(`[PKUDA] Attempting request with primary model: ${primaryModel}`)
+      const response = await makeModelRequest(primaryModel)
+      const fullResponse = await processResponse(response)
+      return NextResponse.json({ 
+        response: fullResponse
+      })
+    } catch (error) {
+      // Primary model failed, try fallback after delay
+      console.log(`[PKUDA] Primary model failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      console.log(`[PKUDA] Waiting ${retryDelayMs}ms before trying fallback: ${fallbackModel}`)
+      await delay(retryDelayMs)
+
+      try {
+        console.log(`[PKUDA] Attempting request with fallback model: ${fallbackModel}`)
+        const fallbackResponse = await makeModelRequest(fallbackModel)
+        const fullResponse = await processResponse(fallbackResponse)
+        return NextResponse.json({ 
+          response: fullResponse
+        })
+      } catch (fallbackError) {
+        // Fallback also failed, return error
+        console.error("[PKUDA] Fallback model also failed:", fallbackError)
+        const errorMessage = fallbackError instanceof Error 
+          ? fallbackError.message 
+          : "שגיאה בתקשורת עם השרת"
         return NextResponse.json(
-          { error: "לא התקבלה תשובה מהשרת" },
+          { error: errorMessage },
           { status: 500 }
         )
       }
-
-      return NextResponse.json({ 
-        response: fullResponse.trim()
-      })
-    } catch (fetchError) {
-      console.error("Gemini API Fetch Error:", fetchError)
-      return NextResponse.json(
-        { error: "שגיאה בתקשורת עם השרת" },
-        { status: 500 }
-      )
     }
   } catch (error) {
     console.error("Chat API Error:", error)
