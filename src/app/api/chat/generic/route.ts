@@ -24,9 +24,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const apiKey = process.env.GROQ_API_KEY
+    const apiKey = process.env.GROK_API_KEY
     if (!apiKey) {
-      console.error("GROQ_API_KEY not configured")
+      console.error("GROK_API_KEY not configured")
       return NextResponse.json(
         { error: "שגיאת תצורה בשרת" },
         { status: 500 }
