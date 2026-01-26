@@ -323,7 +323,7 @@ export function PkudaChatPanel({ isOpen, onClose, initialText, actionType = "exp
                           maxWidth: '100%',
                           maxHeight: '400px',
                           overflowY: 'auto',
-                          overflowX: 'hidden',
+                          overflowX: 'auto',
                           wordBreak: 'break-word',
                           overflowWrap: 'break-word'
                         }}
