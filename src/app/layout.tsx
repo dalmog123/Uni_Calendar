@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
-import { Header } from "@/components/ui/header"
-import { Analytics } from '@vercel/analytics/react'
-import { SpeedInsights } from "@vercel/speed-insights/next"
-import { Footer } from '@/components/footer'
+import { Header } from "@/components/ui/header";
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Footer } from '@/components/footer';
 
 export const metadata: Metadata = {
   title: "UniCalendar",
@@ -17,6 +18,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="he" dir="rtl">
+      <head>
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1160828437861519"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
+      </head>
       <body className="flex flex-col min-h-screen">
         <Header />
         <main className="flex-grow">
